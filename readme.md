@@ -54,12 +54,10 @@ Route-Reflectors, VLAN-based EVPN service model, symmetric IRB with two VRFs.
 
 ### 1.4 Overlay (host-facing) subnets
 
-| VLAN/VNI              | Subnet             | Anycast GW    | VRF        | Leaves     |
-|------------------------|---------------------|----------------|------------|------------|
-| VLAN10 / L2VNI 10010    | 192.168.10.0/24     | 192.168.10.1   | TENANT_A   | leaf1-4    |
-| VLAN20 / L2VNI 10020    | 192.168.20.0/24     | 192.168.20.1   | TENANT_B   | leaf5      |
-| L3VNI (TENANT_A)        | —                   | —              | TENANT_A   | leaf1-4    | → 50010 |
-| L3VNI (TENANT_B)        | —                   | —              | TENANT_B   | leaf5       | → 50020 |
+| VLAN/VNI              | Subnet             | Anycast GW    | VRF        | Leaves     | L3VNI  |
+|------------------------|---------------------|----------------|------------|------------|--------|
+| VLAN10 / L2VNI 10010    | 192.168.10.0/24     | 192.168.10.1   | TENANT_A   | leaf1-4    | 50010  |
+| VLAN20 / L2VNI 10020    | 192.168.20.0/24     | 192.168.20.1   | TENANT_B   | leaf5      | 50020  |
 
 | Host  | Attached leaf(s)  | Data IP            |
 |-------|--------------------|----------------------|

@@ -84,12 +84,25 @@ leaf5  & 10.0.0.15/32 \\
 
 \subsection*{Overlay (host-facing) subnets}
 
-\begin{tabular}{lllll}
+\begin{tabular}{llllll}
 \toprule
-\textbf{VLAN / VNI} & \textbf{Subnet} & \textbf{Anycast GW} & \textbf{VRF} & \textbf{Leaves / Hosts} \\
+\textbf{VLAN / VNI} & \textbf{Subnet} & \textbf{Anycast GW} & \textbf{VRF} & \textbf{Leaves} & \textbf{L3VNI} \\
 \midrule
-VLAN10 / L2VNI 10010 & 192.168.10.0/24 & 192.168.10.1 & TENANT\_A & leaf1--4 / host1, host2, host3 \\
-VLAN20 / L2VNI 10020 & 192.168.20.0/24 & 192.168.20.1 & TENANT\_B & leaf5 / host4 \\
+VLAN10 / L2VNI 10010 & 192.168.10.0/24 & 192.168.10.1 & TENANT\_A & leaf1--4 & 50010 \\
+VLAN20 / L2VNI 10020 & 192.168.20.0/24 & 192.168.20.1 & TENANT\_B & leaf5    & 50020 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.4cm}
+
+\begin{tabular}{lll}
+\toprule
+\textbf{Host} & \textbf{Attached leaf(s)} & \textbf{Data IP} \\
+\midrule
+host1 & leaf1 + leaf2 (ESI-LAG bond0) & 192.168.10.31/24 \\
+host2 & leaf3                         & 192.168.10.32/24 \\
+host3 & leaf4                         & 192.168.10.33/24 \\
+host4 & leaf5                         & 192.168.20.34/24 \\
 \bottomrule
 \end{tabular}
 
@@ -103,6 +116,25 @@ VLAN10 (per leaf) & \texttt{<leaf-loopback>:10}  & 10:10 \\
 VLAN20 (leaf5)     & \texttt{<leaf-loopback>:20}  & 20:20 \\
 VRF TENANT\_A       & \texttt{<leaf-loopback>:100} & 100:100 \\
 VRF TENANT\_B       & \texttt{<leaf-loopback>:200} & 200:200 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.2cm}
+
+{\small
+\textit{Note: TENANT\_A and TENANT\_B use different RTs on purpose --- no route}\\
+\textit{leaking, so host4 will not reach host1/2/3. That's intended VRF isolation,}\\
+\textit{not a bug --- good talking point for the interview.}
+}
+
+\subsection*{ESI (ethernet-segment) for host1's dual-homed link}
+
+\begin{tabular}{lll}
+\toprule
+\textbf{Leaf} & \textbf{Port} & \textbf{ESI} \\
+\midrule
+leaf1 & Port-Channel1 & \texttt{0000:0000:0000:1001:0001} \\
+leaf2 & Port-Channel1 & \texttt{0000:0000:0000:1001:0001} (same ESI = same Ethernet Segment) \\
 \bottomrule
 \end{tabular}
 
