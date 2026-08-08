@@ -1,0 +1,92 @@
+name: ceos-fabric
+
+mgmt:
+  network: arista-mgmt
+  ipv4-subnet: 172.60.60.0/24
+
+topology:
+  kinds:
+    arista_ceos:
+      image: networkop/ceos:4.32.10M
+      cpu: 1.5
+      memory: 1536Mi
+    linux:
+      image: debian:12
+      cpu: 0.5                                       # Prevents GUI freezing
+      memory: 512Mi                                  # Protects our available RAM
+
+  nodes:
+    # --- SPINES ---
+    spine1:
+      kind: arista_ceos
+      mgmt-ipv4: 172.60.60.21
+      # Waits 30 seconds after the deployment starts before booting
+      startup-delay: 30
+    spine2:
+      kind: arista_ceos
+      mgmt-ipv4: 172.60.60.22
+      startup-delay: 60
+
+    # --- LEAVES ---
+    leaf1:
+      kind: arista_ceos
+      mgmt-ipv4: 172.60.60.11
+    leaf2:
+      kind: arista_ceos
+      mgmt-ipv4: 172.60.60.12
+    leaf3:
+      kind: arista_ceos
+      mgmt-ipv4: 172.60.60.13
+    leaf4:
+      kind: arista_ceos
+      mgmt-ipv4: 172.60.60.14
+    leaf5:
+      kind: arista_ceos
+      mgmt-ipv4: 172.60.60.15
+
+    # --- HOSTS ---
+    # Dual-homed to leaf1 + leaf2 -> ESI-LAG / EVPN multihoming lab
+    host1:
+      kind: linux
+      mgmt-ipv4: 172.60.60.31
+
+    # Single-homed, same VLAN/VNI on different leaves -> L2 EVPN stretch lab (Type-2 routes)
+    host2:
+      kind: linux
+      mgmt-ipv4: 172.60.60.32
+    host3:
+      kind: linux
+      mgmt-ipv4: 172.60.60.33
+
+    # Single-homed, different VLAN/VNI/VRF -> L3 inter-VNI EVPN routing lab (IRB / Type-5)
+    host4:
+      kind: linux
+      mgmt-ipv4: 172.60.60.34
+
+  links:
+    # --- LEAF 1 ---
+    - endpoints: ["leaf1:eth1", "spine1:eth1"]
+    - endpoints: ["leaf1:eth2", "spine2:eth1"]
+    # --- LEAF 2 ---
+    - endpoints: ["leaf2:eth1", "spine1:eth2"]
+    - endpoints: ["leaf2:eth2", "spine2:eth2"]
+    # --- LEAF 3 ---
+    - endpoints: ["leaf3:eth1", "spine1:eth3"]
+    - endpoints: ["leaf3:eth2", "spine2:eth3"]
+    # --- LEAF 4 ---
+    - endpoints: ["leaf4:eth1", "spine1:eth4"]
+    - endpoints: ["leaf4:eth2", "spine2:eth4"]
+    # --- LEAF 5 ---
+    - endpoints: ["leaf5:eth1", "spine1:eth5"]
+    - endpoints: ["leaf5:eth2", "spine2:eth5"]
+
+    # --- HOST ATTACHMENTS ---
+    # host1: Dual-homed to leaf1 + leaf2 -> ESI-LAG / EVPN multihoming lab
+    - endpoints: ["leaf1:eth3", "host1:eth1"]
+    - endpoints: ["leaf2:eth3", "host1:eth2"]
+    # host2 / host3: Single-homed, same VLAN/VNI on different leaves -> L2 EVPN stretch lab (Type-2 routes)
+    - endpoints: ["leaf3:eth3", "host2:eth1"]
+    - endpoints: ["leaf4:eth3", "host3:eth1"]
+    # host4: Single-homed, different VLAN/VNI/VRF -> L3 inter-VNI EVPN routing lab (IRB / Type-5)
+    - endpoints: ["leaf5:eth3", "host4:eth1"]
+
