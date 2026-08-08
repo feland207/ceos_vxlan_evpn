@@ -762,40 +762,48 @@ Run via `docker exec -it clab-ceos-fabric-<node> bash`, then as root:
 ### host1 — ESI-LAG dual-homed (bond0, LACP active, VLAN10)
 
 ```bash
-ip link add bond0 type bond mode 802.3ad lacp_rate fast
-ip link set eth1 down
-ip link set eth1 master bond0
-ip link set eth2 down
-ip link set eth2 master bond0
-ip link set eth1 up
-ip link set eth2 up
-ip link set bond0 up
-ip addr add 192.168.10.31/24 dev bond0
-ip route add default via 192.168.10.1
+sudo ip link add bond0 type bond mode 802.3ad lacp_rate fast
+sudo ip link set eth1 down
+sudo ip link set eth1 master bond0
+sudo ip link set eth2 down
+sudo ip link set eth2 master bond0
+sudo ip link set eth1 up
+sudo ip link set eth2 up
+sudo ip link set bond0 up
+sudo ip addr add 192.168.10.31/24 dev bond0
+# sudo ip route add default via 192.168.10.1
+# Use only if need to test a specific inter-subnet path within the same VRF
+sudo ip route add <destination-subnet> via 192.168.10.1 dev bond0
 ```
 
 ### host2 — single-homed to leaf3, VLAN10
 
 ```bash
-ip addr add 192.168.10.32/24 dev eth1
-ip link set eth1 up
-ip route add default via 192.168.10.1
+sudo ip addr add 192.168.10.32/24 dev eth1
+sudo ip link set eth1 up
+# sudo ip route add default via 192.168.10.1
+# Use only if need to test a specific inter-subnet path within the same VRF
+sudo ip route add <destination-subnet> via 192.168.10.1 dev bond0
 ```
 
 ### host3 — single-homed to leaf4, VLAN10
 
 ```bash
-ip addr add 192.168.10.33/24 dev eth1
-ip link set eth1 up
-ip route add default via 192.168.10.1
+sudo ip addr add 192.168.10.33/24 dev eth1
+sudo ip link set eth1 up
+# sudo ip route add default via 192.168.10.1
+# Use only if need to test a specific inter-subnet path within the same VRF
+sudo ip route add <destination-subnet> via 192.168.10.1 dev bond0
 ```
 
 ### host4 — single-homed to leaf5, VLAN20 / TENANT_B
 
 ```bash
-ip addr add 192.168.20.34/24 dev eth1
-ip link set eth1 up
-ip route add default via 192.168.20.1
+sudo ip addr add 192.168.20.34/24 dev eth1
+sudo ip link set eth1 up
+# sudo ip route add default via 192.168.20.1
+# Use only if need to test a specific inter-subnet path within the same VRF
+sudo ip route add <destination-subnet> via 192.168.20.1 dev eth1
 ```
 
 ---
@@ -835,11 +843,11 @@ ready to carry the iBGP EVPN sessions.
 ### 4.4 BGP EVPN overlay
 
 ```
-show bgp evpn summary                     ! all sessions Established
-show bgp evpn route-type imet             ! Type-3 (Inclusive Multicast — VTEP/VNI discovery)
-show bgp evpn route-type mac-ip           ! Type-2 (MAC/IP — host reachability)
-show bgp evpn route-type ip-prefix        ! Type-5 (IP-Prefix — subnet routes from redistribute connected)
-show bgp evpn instance                    ! per-VNI RD/RT/route counts
+show bgp evpn summary                       ! all sessions Established
+show bgp evpn route-type imet               ! Type-3 (Inclusive Multicast — VTEP/VNI discovery)
+show bgp evpn route-type mac-ip             ! Type-2 (MAC/IP — host reachability)
+show bgp evpn route-type ip-prefix ipv4     ! Type-5 (IP-Prefix — subnet routes from redistribute connected)
+show bgp evpn instance                      ! per-VNI RD/RT/route counts
 ```
 
 ### 4.5 VXLAN data plane
@@ -853,9 +861,14 @@ show interfaces vxlan1
 ### 4.6 ESI / multihoming (on leaf1 and leaf2)
 
 ```
-show evpn ethernet-segment
-show evpn ethernet-segment detail
-show port-channel summary
+show bgp evpn route-type ethernet-segment
+show bgp evpn route-type ethernet-segment detail
+show port-channel
+
+# Seeing learned MAC addresses
+show mac address-table vlan 10
+show bgp evpn route-type mac-ip
+show vxlan address-table
 ```
 
 ---
