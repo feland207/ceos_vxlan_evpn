@@ -29,8 +29,8 @@ Route-Reflectors, VLAN-based EVPN service model, symmetric IRB with two VRFs.
 
 | Node   | Loopback0    |
 |--------|--------------|
-| spine1 | 10.0.0.1/32  |
-| spine2 | 10.0.0.2/32  |
+| spine1 | 10.0.0.21/32  |
+| spine2 | 10.0.0.22/32  |
 | leaf1  | 10.0.0.11/32 |
 | leaf2  | 10.0.0.12/32 |
 | leaf3  | 10.0.0.13/32 |
@@ -63,10 +63,10 @@ Route-Reflectors, VLAN-based EVPN service model, symmetric IRB with two VRFs.
 
 | Host  | Attached leaf(s)  | Data IP            |
 |-------|--------------------|----------------------|
-| host1 | leaf1 + leaf2 (ESI-LAG bond0) | 192.168.10.11/24 |
-| host2 | leaf3              | 192.168.10.12/24    |
-| host3 | leaf4              | 192.168.10.13/24    |
-| host4 | leaf5              | 192.168.20.14/24    |
+| host1 | leaf1 + leaf2 (ESI-LAG bond0) | 192.168.10.31/24 |
+| host2 | leaf3              | 192.168.10.32/24    |
+| host3 | leaf4              | 192.168.10.33/24    |
+| host4 | leaf5              | 192.168.20.34/24    |
 
 ### 1.5 RD / RT scheme
 
@@ -92,13 +92,13 @@ not a bug — good talking point for the interview.
 
 ## 2. cEOS configs
 
-### spine1 (10.0.0.1)
+### spine1 (10.0.0.21)
 
 ```
 hostname spine1
 !
 interface Loopback0
-   ip address 10.0.0.1/32
+   ip address 10.0.0.21/32
    isis enable UNDERLAY
    isis passive
 !
@@ -139,13 +139,13 @@ router isis UNDERLAY
    address-family ipv4 unicast
 !
 router bgp 65000
-   router-id 10.0.0.1
+   router-id 10.0.0.21
    no bgp default ipv4-unicast
    neighbor RR-PEER peer-group
    neighbor RR-PEER remote-as 65000
    neighbor RR-PEER update-source Loopback0
    neighbor RR-PEER send-community extended
-   neighbor 10.0.0.2 peer-group RR-PEER
+   neighbor 10.0.0.22 peer-group RR-PEER
    !
    neighbor EVPN-CLIENT peer-group
    neighbor EVPN-CLIENT remote-as 65000
@@ -165,13 +165,13 @@ router bgp 65000
 end
 ```
 
-### spine2 (10.0.0.2)
+### spine2 (10.0.0.22)
 
 ```
 hostname spine2
 !
 interface Loopback0
-   ip address 10.0.0.2/32
+   ip address 10.0.0.22/32
    isis enable UNDERLAY
    isis passive
 !
@@ -212,13 +212,13 @@ router isis UNDERLAY
    address-family ipv4 unicast
 !
 router bgp 65000
-   router-id 10.0.0.2
+   router-id 10.0.0.22
    no bgp default ipv4-unicast
    neighbor RR-PEER peer-group
    neighbor RR-PEER remote-as 65000
    neighbor RR-PEER update-source Loopback0
    neighbor RR-PEER send-community extended
-   neighbor 10.0.0.1 peer-group RR-PEER
+   neighbor 10.0.0.21 peer-group RR-PEER
    !
    neighbor EVPN-CLIENT peer-group
    neighbor EVPN-CLIENT remote-as 65000
@@ -297,8 +297,8 @@ router bgp 65000
    neighbor SPINES remote-as 65000
    neighbor SPINES update-source Loopback0
    neighbor SPINES send-community extended
-   neighbor 10.0.0.1 peer-group SPINES
-   neighbor 10.0.0.2 peer-group SPINES
+   neighbor 10.0.0.21 peer-group SPINES
+   neighbor 10.0.0.22 peer-group SPINES
    !
    address-family evpn
       neighbor SPINES activate
@@ -379,8 +379,8 @@ router bgp 65000
    neighbor SPINES remote-as 65000
    neighbor SPINES update-source Loopback0
    neighbor SPINES send-community extended
-   neighbor 10.0.0.1 peer-group SPINES
-   neighbor 10.0.0.2 peer-group SPINES
+   neighbor 10.0.0.21 peer-group SPINES
+   neighbor 10.0.0.22 peer-group SPINES
    !
    address-family evpn
       neighbor SPINES activate
@@ -455,8 +455,8 @@ router bgp 65000
    neighbor SPINES remote-as 65000
    neighbor SPINES update-source Loopback0
    neighbor SPINES send-community extended
-   neighbor 10.0.0.1 peer-group SPINES
-   neighbor 10.0.0.2 peer-group SPINES
+   neighbor 10.0.0.21 peer-group SPINES
+   neighbor 10.0.0.22 peer-group SPINES
    !
    address-family evpn
       neighbor SPINES activate
@@ -531,8 +531,8 @@ router bgp 65000
    neighbor SPINES remote-as 65000
    neighbor SPINES update-source Loopback0
    neighbor SPINES send-community extended
-   neighbor 10.0.0.1 peer-group SPINES
-   neighbor 10.0.0.2 peer-group SPINES
+   neighbor 10.0.0.21 peer-group SPINES
+   neighbor 10.0.0.22 peer-group SPINES
    !
    address-family evpn
       neighbor SPINES activate
@@ -607,8 +607,8 @@ router bgp 65000
    neighbor SPINES remote-as 65000
    neighbor SPINES update-source Loopback0
    neighbor SPINES send-community extended
-   neighbor 10.0.0.1 peer-group SPINES
-   neighbor 10.0.0.2 peer-group SPINES
+   neighbor 10.0.0.21 peer-group SPINES
+   neighbor 10.0.0.22 peer-group SPINES
    !
    address-family evpn
       neighbor SPINES activate
@@ -647,14 +647,14 @@ ip link set eth2 master bond0
 ip link set eth1 up
 ip link set eth2 up
 ip link set bond0 up
-ip addr add 192.168.10.11/24 dev bond0
+ip addr add 192.168.10.31/24 dev bond0
 ip route add default via 192.168.10.1
 ```
 
 ### host2 — single-homed to leaf3, VLAN10
 
 ```bash
-ip addr add 192.168.10.12/24 dev eth1
+ip addr add 192.168.10.32/24 dev eth1
 ip link set eth1 up
 ip route add default via 192.168.10.1
 ```
@@ -662,7 +662,7 @@ ip route add default via 192.168.10.1
 ### host3 — single-homed to leaf4, VLAN10
 
 ```bash
-ip addr add 192.168.10.13/24 dev eth1
+ip addr add 192.168.10.33/24 dev eth1
 ip link set eth1 up
 ip route add default via 192.168.10.1
 ```
@@ -670,7 +670,7 @@ ip route add default via 192.168.10.1
 ### host4 — single-homed to leaf5, VLAN20 / TENANT_B
 
 ```bash
-ip addr add 192.168.20.14/24 dev eth1
+ip addr add 192.168.20.34/24 dev eth1
 ip link set eth1 up
 ip route add default via 192.168.20.1
 ```
@@ -698,8 +698,8 @@ show ip route isis                 ! confirm all loopbacks learned via ISIS
 ### 4.3 Ping to loopbacks (run from any node, sourced from its own Loopback0)
 
 ```
-ping 10.0.0.1 source Loopback0
-ping 10.0.0.2 source Loopback0
+ping 10.0.0.21 source Loopback0
+ping 10.0.0.22 source Loopback0
 ping 10.0.0.11 source Loopback0
 ping 10.0.0.12 source Loopback0
 ping 10.0.0.13 source Loopback0
@@ -748,15 +748,15 @@ cat /proc/net/bonding/bond0
 
 # host2 -> ping gateway and host2's L2-stretch peer (host3, different leaf, same VNI)
 ping -c4 192.168.10.1
-ping -c4 192.168.10.13
+ping -c4 192.168.10.33
 
 # host1 -> ping gateway and host2/host3 (proves ESI-LAG host reaches L2-stretched peers)
 ping -c4 192.168.10.1
-ping -c4 192.168.10.12
+ping -c4 192.168.10.32
 
 # host4 -> ping its own gateway only
 ping -c4 192.168.20.1
 
 # Expected to FAIL by design (different VRF, no RT leak — proves tenant isolation):
-ping -c4 192.168.10.12
+ping -c4 192.168.10.32
 ```
