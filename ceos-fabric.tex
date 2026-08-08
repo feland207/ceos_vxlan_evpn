@@ -1,0 +1,109 @@
+% Compile with: xelatex ceos_clos_wiring.tex   (or lualatex)
+% Requires a Unicode monospace font with box-drawing glyph coverage.
+% DejaVu Sans Mono (used below) is free and covers U+2500-257F fully.
+\documentclass[11pt]{article}
+\usepackage{fontspec}
+\setmainfont{DejaVu Sans}
+\setmonofont{DejaVu Sans Mono}
+\usepackage[margin=1.2cm,landscape,a3paper]{geometry}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{titlesec}
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{1em}{}
+
+\begin{document}
+
+\section*{EVPN-VXLAN Lab --- ceos\_clos.yml}
+\subsection*{Layer 1 wiring, loopbacks and interfaces}
+
+{\small
+\textit{Note: the ten spine--leaf uplinks are shown as labeled point-to-point stubs at each}\\
+\textit{node rather than as ten crossing diagonal lines, to keep the diagram readable. Each}\\
+\textit{stub names both the local port and the exact remote node:port it terminates on.}
+}
+
+\begin{verbatim}
+┌──────────────┐          ┌──────────────┐
+│    spine1    │          │    spine2    │
+│ 10.0.0.21/32 │          │ 10.0.0.22/32 │
+└──────────────┘          └──────────────┘
+
+eth1 -> leaf1:eth1        eth1 -> leaf1:eth2
+eth2 -> leaf2:eth1        eth2 -> leaf2:eth2
+eth3 -> leaf3:eth1        eth3 -> leaf3:eth2
+eth4 -> leaf4:eth1        eth4 -> leaf4:eth2
+eth5 -> leaf5:eth1        eth5 -> leaf5:eth2
+
+
+eth1->spine1            eth1->spine1            eth1->spine1            eth1->spine1            eth1->spine1
+eth2->spine2            eth2->spine2            eth2->spine2            eth2->spine2            eth2->spine2
+┌──────────────┐        ┌──────────────┐        ┌──────────────┐        ┌──────────────┐        ┌──────────────┐
+│    leaf1     │        │    leaf2     │        │    leaf3     │        │    leaf4     │        │    leaf5     │
+│ 10.0.0.11/32 │        │ 10.0.0.12/32 │        │ 10.0.0.13/32 │        │ 10.0.0.14/32 │        │ 10.0.0.15/32 │
+└───────┬──────┘        └───────┬──────┘        └───────┬──────┘        └───────┬──────┘        └───────┬──────┘
+        │ eth3                  │ eth3                  │ eth3                  │ eth3                  │ eth3
+        │                       │                       │                       │                       │
+        │                       │                       │                       │                       │
+        │                       │                       │                       │                       │
+        │                       │                       │                       │                       │
+        └──────┐        ┌───────┘                       │                       │                       │
+          eth1 │        │ eth2                          │ eth1                  │ eth1                  │ eth1
+            ┌──┴────────┴──┐                    ┌───────┴──────┐        ┌───────┴──────┐        ┌───────┴──────┐
+            │    host1     │                    │    host2     │        │    host3     │        │    host4     │
+            │192.168.10.31 │                    │192.168.10.32 │        │192.168.10.33 │        │192.168.20.34 │
+            └──────────────┘                    └──────────────┘        └──────────────┘        └──────────────┘
+
+
+# --- OVERLAY SUBNETS ---
+  host1, host2, host3  ->  VLAN 10 / L2VNI 10010  ->  192.168.10.0/24  (VRF TENANT_A)
+  host4                ->  VLAN 20 / L2VNI 10020  ->  192.168.20.0/24  (VRF TENANT_B)
+
+# --- HOST ATTACHMENTS ---
+    host1: Dual-homed to leaf1 + leaf2 -> ESI-LAG / EVPN multihoming lab
+    host2 / host3: Single-homed, same VLAN/VNI on different leaves -> L2 EVPN stretch lab (Type-2 routes)
+    host4: Single-homed, different VLAN/VNI/VRF -> L3 inter-VNI EVPN routing lab (IRB / Type-5)
+
+\end{verbatim}
+
+\newpage
+\subsection*{Loopback0 addresses}
+
+\begin{tabular}{ll}
+\toprule
+\textbf{Node} & \textbf{Loopback0} \\
+\midrule
+spine1 & 10.0.0.21/32 \\
+spine2 & 10.0.0.22/32 \\
+leaf1  & 10.0.0.11/32 \\
+leaf2  & 10.0.0.12/32 \\
+leaf3  & 10.0.0.13/32 \\
+leaf4  & 10.0.0.14/32 \\
+leaf5  & 10.0.0.15/32 \\
+\bottomrule
+\end{tabular}
+
+\subsection*{Overlay (host-facing) subnets}
+
+\begin{tabular}{lllll}
+\toprule
+\textbf{VLAN / VNI} & \textbf{Subnet} & \textbf{Anycast GW} & \textbf{VRF} & \textbf{Leaves / Hosts} \\
+\midrule
+VLAN10 / L2VNI 10010 & 192.168.10.0/24 & 192.168.10.1 & TENANT\_A & leaf1--4 / host1, host2, host3 \\
+VLAN20 / L2VNI 10020 & 192.168.20.0/24 & 192.168.20.1 & TENANT\_B & leaf5 / host4 \\
+\bottomrule
+\end{tabular}
+
+\subsection*{RD / RT scheme}
+
+\begin{tabular}{lll}
+\toprule
+\textbf{Scope} & \textbf{RD pattern} & \textbf{RT (common, must match to import)} \\
+\midrule
+VLAN10 (per leaf) & \texttt{<leaf-loopback>:10}  & 10:10 \\
+VLAN20 (leaf5)     & \texttt{<leaf-loopback>:20}  & 20:20 \\
+VRF TENANT\_A       & \texttt{<leaf-loopback>:100} & 100:100 \\
+VRF TENANT\_B       & \texttt{<leaf-loopback>:200} & 200:200 \\
+\bottomrule
+\end{tabular}
+
+\end{document}
