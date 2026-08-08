@@ -82,6 +82,20 @@ leaf5  & 10.0.0.15/32 \\
 \bottomrule
 \end{tabular}
 
+\vspace{0.4cm}
+
+\noindent
+\begin{tabular}{lll}
+\toprule
+\textbf{Host} & \textbf{Attached leaf(s)} & \textbf{Data IP} \\
+\midrule
+host1 & leaf1 + leaf2 (ESI-LAG bond0) & 192.168.10.31/24 \\
+host2 & leaf3                         & 192.168.10.32/24 \\
+host3 & leaf4                         & 192.168.10.33/24 \\
+host4 & leaf5                         & 192.168.20.34/24 \\
+\bottomrule
+\end{tabular}
+
 \subsection*{Overlay (host-facing) subnets}
 
 \begin{tabular}{llllll}
@@ -95,6 +109,7 @@ VLAN20 / L2VNI 10020 & 192.168.20.0/24 & 192.168.20.1 & TENANT\_B & leaf5    & 5
 
 \vspace{0.4cm}
 
+\noindent
 \begin{tabular}{lll}
 \toprule
 \textbf{Host} & \textbf{Attached leaf(s)} & \textbf{Data IP} \\
@@ -122,9 +137,9 @@ VRF TENANT\_B       & \texttt{<leaf-loopback>:200} & 200:200 \\
 \vspace{0.2cm}
 
 {\small
-\textit{Note: TENANT\_A and TENANT\_B use different RTs on purpose --- no route}\\
-\textit{leaking, so host4 will not reach host1/2/3. That's intended VRF isolation,}\\
-\textit{not a bug --- good talking point for the interview.}
+\noindent
+\textit{Note: TENANT\_A and TENANT\_B use different RTs on purpose --- no route leaking, so host4 will not reach host1/2/3.}\\
+\textit{That's intended VRF isolation, not a bug --- good talking point for the interview.}
 }
 
 \subsection*{ESI (ethernet-segment) for host1's dual-homed link}
