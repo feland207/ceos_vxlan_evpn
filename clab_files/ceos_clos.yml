@@ -10,6 +10,8 @@ topology:
       image: networkop/ceos:4.32.10M
       cpu: 1.5
       memory: 1536Mi
+      env:
+        CLAB_MGMT_VRF: MGMT
     linux:
       image: debian:12
       cpu: 0.5                                       # Prevents GUI freezing
@@ -22,27 +24,34 @@ topology:
       mgmt-ipv4: 172.60.60.21
       # Waits 30 seconds after the deployment starts before booting
       startup-delay: 30
+      # startup-config: ../startup-configs/spine1.cfg
     spine2:
       kind: arista_ceos
       mgmt-ipv4: 172.60.60.22
       startup-delay: 60
+      # startup-config: ../startup-configs/spine2.cfg
 
     # --- LEAVES ---
     leaf1:
       kind: arista_ceos
       mgmt-ipv4: 172.60.60.11
+      # startup-config: ../startup-configs/leaf1.cfg
     leaf2:
       kind: arista_ceos
       mgmt-ipv4: 172.60.60.12
+      # startup-config: ../startup-configs/leaf2.cfg
     leaf3:
       kind: arista_ceos
       mgmt-ipv4: 172.60.60.13
+      # startup-config: ../startup-configs/leaf3.cfg
     leaf4:
       kind: arista_ceos
       mgmt-ipv4: 172.60.60.14
+      # startup-config: ../startup-configs/leaf4.cfg
     leaf5:
       kind: arista_ceos
       mgmt-ipv4: 172.60.60.15
+      # startup-config: ../startup-configs/leaf5.cfg
 
     # --- HOSTS ---
     # Dual-homed to leaf1 + leaf2 -> ESI-LAG / EVPN multihoming lab

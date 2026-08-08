@@ -1,0 +1,59 @@
+---
+- name: Collect backup config (Multi-Platform)
+  hosts: all
+  connection: ansible.netcommon.network_cli
+  gather_facts: no
+
+  vars:
+    wait_time: 60
+    backup_dir: >-
+      {{ playbook_dir }}/backups/{{
+        'iosxr' if ansible_network_os == 'cisco.iosxr.iosxr'
+        else ('iosxe' if ansible_network_os == 'cisco.ios.ios'
+        else 'ceos') }}
+    log_dir: ./log/ansible
+
+  vars_files:
+    - secrets.yml
+
+  tasks:
+    - name: Create local configs directory
+      delegate_to: localhost
+      # run_once: true has been REMOVED so it evaluates for XE, XR, and cEOS
+      ansible.builtin.file:
+        path: "{{ backup_dir }}"
+        state: directory
+
+    - name: Execute show running-config on IOS XR
+      cisco.iosxr.iosxr_command:
+        commands:
+          - show running-config
+      register: xr_config_output
+      when: ansible_network_os == 'cisco.iosxr.iosxr'
+
+    - name: Execute show running-config on IOS XE
+      cisco.ios.ios_command:
+        commands:
+          - show running-config
+      register: xe_config_output
+      when: ansible_network_os == 'cisco.ios.ios'
+
+    - name: Execute show running-config on Arista cEOS
+      arista.eos.eos_command:
+        commands:
+          - show running-config
+      register: ceos_config_output
+      when: ansible_network_os == 'arista.eos.eos'
+
+    - name: Unify config output
+      ansible.builtin.set_fact:
+        config_output: >-
+          {{ xr_config_output if ansible_network_os == 'cisco.iosxr.iosxr'
+          else (xe_config_output if ansible_network_os == 'cisco.ios.ios'
+          else ceos_config_output) }}
+
+    - name: Save config to file
+      ansible.builtin.copy:
+        content: "{{ config_output.stdout[0] }}"
+        dest: "{{ backup_dir }}/{{ inventory_hostname }}.cfg"
+      delegate_to: localhost
