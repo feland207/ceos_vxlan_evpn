@@ -167,6 +167,8 @@ router bgp 65000
       neighbor RR-PEER activate
       neighbor EVPN-CLIENT activate
 !
+ip routing
+!
 end
 ```
 
@@ -244,6 +246,8 @@ router bgp 65000
    address-family evpn
       neighbor RR-PEER activate
       neighbor EVPN-CLIENT activate
+!
+ip routing
 !
 end
 ```

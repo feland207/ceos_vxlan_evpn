@@ -99,3 +99,5 @@ topology:
     # host4: Single-homed, different VLAN/VNI/VRF -> L3 inter-VNI EVPN routing lab (IRB / Type-5)
     - endpoints: ["leaf5:eth3", "host4:eth1"]
 
+# Manually collect running config:
+# docker exec clab-ceos-fabric-spine1 Cli -p 15 -c "show running-config" > startup-configs/spine1.cfg

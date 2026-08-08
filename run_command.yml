@@ -1,0 +1,84 @@
+---
+- name: Interactive Show Command (Multi-Platform)
+  hosts: all
+  connection: ansible.netcommon.network_cli
+  gather_facts: no
+
+  vars_prompt:
+    - name: user_show_command
+      prompt: "Enter the show command (e.g., show version)"
+      private: no
+      default: "show version"
+
+  vars:
+    wait_time: 60
+    log_dir: >-
+      ./logs/{{
+        'iosxr' if ansible_network_os == 'cisco.iosxr.iosxr'
+        else ('iosxe' if ansible_network_os == 'cisco.ios.ios'
+        else 'ceos') }}
+
+  vars_files:
+    - secrets.yml
+
+  tasks:
+    - name: Create logs debug directory
+      delegate_to: localhost
+      # run_once: true has been REMOVED so it evaluates for XE, XR, and cEOS
+      ansible.builtin.file:
+        path: "{{ log_dir }}"
+        state: directory
+
+    - name: Run command on IOS XR devices
+      cisco.iosxr.iosxr_command:
+        commands: "{{ user_show_command }}"
+      register: xr_response
+      when: ansible_network_os == 'cisco.iosxr.iosxr'
+
+    - name: Run command on IOS XE devices
+      cisco.ios.ios_command:
+        commands: "{{ user_show_command }}"
+      register: xe_response
+      when: ansible_network_os == 'cisco.ios.ios'
+
+    - name: Run command on Arista cEOS devices
+      arista.eos.eos_command:
+        commands: "{{ user_show_command }}"
+      register: ceos_response
+      when: ansible_network_os == 'arista.eos.eos'
+
+    - name: Unify command response
+      ansible.builtin.set_fact:
+        cli_response: >-
+          {{ xr_response if ansible_network_os == 'cisco.iosxr.iosxr'
+          else (xe_response if ansible_network_os == 'cisco.ios.ios'
+          else ceos_response) }}
+
+    - name: Print command results
+      ansible.builtin.debug:
+        msg: "{{ cli_response.stdout_lines[0] }}"
+
+    - name: Save Full Output to Logs
+      ansible.builtin.copy:
+        content: "{{ cli_response.stdout[0] }}"
+        dest: "{{ log_dir }}/{{ inventory_hostname }}_{{ user_show_command | replace(' ', '_') }}.log"
+      delegate_to: localhost
+
+    - name: Logs saved
+      ansible.builtin.debug:
+        msg: "Full output saved to {{ log_dir }}/{{ inventory_hostname }}_{{ user_show_command | replace(' ', '_') }}.log"
+
+
+    # The noisy approach
+    # - name: Print command output
+    #   ansible.builtin.debug:
+    #     msg: "{{ item }}"
+    #   loop: "{{ cli_response.stdout_lines }}"
+    #   loop_control:
+    #     # Hides the 'item' content in the task header to keep it 'clean'
+    #     label: "Line"
+
+    # ansible-playbook run_command.yml -l ISP-A | tee debug_run.log
+    # ansible-playbook run_command.yml -l ceos | tee debug_run.log
+
+    # Bugs: Type 'bool' cannot be serialized when show command does not return anything; See readme.md
