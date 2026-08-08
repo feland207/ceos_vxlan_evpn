@@ -103,37 +103,42 @@ interface Loopback0
    isis passive
 !
 interface Ethernet1
+   description "link-to-leaf1"
    no switchport
    ip address 10.1.1.1/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet2
+   description "link-to-leaf2"
    no switchport
    ip address 10.1.2.1/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet3
+   description "link-to-leaf3"
    no switchport
    ip address 10.1.3.1/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet4
+   description "link-to-leaf4"
    no switchport
    ip address 10.1.4.1/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet5
+   description "link-to-leaf5"
    no switchport
    ip address 10.1.5.1/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 router isis UNDERLAY
-   net 49.0001.0000.0000.0001.00
+   net 49.0001.0000.0000.0021.00
    is-type level-2
    log-adjacency-changes
    address-family ipv4 unicast
@@ -141,22 +146,22 @@ router isis UNDERLAY
 router bgp 65000
    router-id 10.0.0.21
    no bgp default ipv4-unicast
-   neighbor RR-PEER peer-group
+   neighbor RR-PEER peer group
    neighbor RR-PEER remote-as 65000
    neighbor RR-PEER update-source Loopback0
    neighbor RR-PEER send-community extended
-   neighbor 10.0.0.22 peer-group RR-PEER
+   neighbor 10.0.0.22 peer group RR-PEER
    !
-   neighbor EVPN-CLIENT peer-group
+   neighbor EVPN-CLIENT peer group
    neighbor EVPN-CLIENT remote-as 65000
    neighbor EVPN-CLIENT update-source Loopback0
    neighbor EVPN-CLIENT send-community extended
    neighbor EVPN-CLIENT route-reflector-client
-   neighbor 10.0.0.11 peer-group EVPN-CLIENT
-   neighbor 10.0.0.12 peer-group EVPN-CLIENT
-   neighbor 10.0.0.13 peer-group EVPN-CLIENT
-   neighbor 10.0.0.14 peer-group EVPN-CLIENT
-   neighbor 10.0.0.15 peer-group EVPN-CLIENT
+   neighbor 10.0.0.11 peer group EVPN-CLIENT
+   neighbor 10.0.0.12 peer group EVPN-CLIENT
+   neighbor 10.0.0.13 peer group EVPN-CLIENT
+   neighbor 10.0.0.14 peer group EVPN-CLIENT
+   neighbor 10.0.0.15 peer group EVPN-CLIENT
    !
    address-family evpn
       neighbor RR-PEER activate
@@ -176,37 +181,42 @@ interface Loopback0
    isis passive
 !
 interface Ethernet1
+   description "link-to-leaf1"
    no switchport
    ip address 10.2.1.1/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet2
+   description "link-to-leaf2"
    no switchport
    ip address 10.2.2.1/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet3
+   description "link-to-leaf3"
    no switchport
    ip address 10.2.3.1/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet4
+   description "link-to-leaf4"
    no switchport
    ip address 10.2.4.1/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet5
+   description "link-to-leaf5"
    no switchport
    ip address 10.2.5.1/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 router isis UNDERLAY
-   net 49.0001.0000.0000.0002.00
+   net 49.0001.0000.0000.0022.00
    is-type level-2
    log-adjacency-changes
    address-family ipv4 unicast
@@ -214,22 +224,22 @@ router isis UNDERLAY
 router bgp 65000
    router-id 10.0.0.22
    no bgp default ipv4-unicast
-   neighbor RR-PEER peer-group
+   neighbor RR-PEER peer group
    neighbor RR-PEER remote-as 65000
    neighbor RR-PEER update-source Loopback0
    neighbor RR-PEER send-community extended
-   neighbor 10.0.0.21 peer-group RR-PEER
+   neighbor 10.0.0.21 peer group RR-PEER
    !
-   neighbor EVPN-CLIENT peer-group
+   neighbor EVPN-CLIENT peer group
    neighbor EVPN-CLIENT remote-as 65000
    neighbor EVPN-CLIENT update-source Loopback0
    neighbor EVPN-CLIENT send-community extended
    neighbor EVPN-CLIENT route-reflector-client
-   neighbor 10.0.0.11 peer-group EVPN-CLIENT
-   neighbor 10.0.0.12 peer-group EVPN-CLIENT
-   neighbor 10.0.0.13 peer-group EVPN-CLIENT
-   neighbor 10.0.0.14 peer-group EVPN-CLIENT
-   neighbor 10.0.0.15 peer-group EVPN-CLIENT
+   neighbor 10.0.0.11 peer group EVPN-CLIENT
+   neighbor 10.0.0.12 peer group EVPN-CLIENT
+   neighbor 10.0.0.13 peer group EVPN-CLIENT
+   neighbor 10.0.0.14 peer group EVPN-CLIENT
+   neighbor 10.0.0.15 peer group EVPN-CLIENT
    !
    address-family evpn
       neighbor RR-PEER activate
@@ -251,18 +261,21 @@ interface Loopback0
    isis passive
 !
 interface Ethernet1
+   description "link-to-spine1"
    no switchport
    ip address 10.1.1.2/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet2
+   description "link-to-spine2"
    no switchport
    ip address 10.2.1.2/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet3
+   description "link-to-host1"
    channel-group 1 mode active
 !
 interface Port-Channel1
@@ -293,12 +306,12 @@ router isis UNDERLAY
 router bgp 65000
    router-id 10.0.0.11
    no bgp default ipv4-unicast
-   neighbor SPINES peer-group
+   neighbor SPINES peer group
    neighbor SPINES remote-as 65000
    neighbor SPINES update-source Loopback0
    neighbor SPINES send-community extended
-   neighbor 10.0.0.21 peer-group SPINES
-   neighbor 10.0.0.22 peer-group SPINES
+   neighbor 10.0.0.21 peer group SPINES
+   neighbor 10.0.0.22 peer group SPINES
    !
    address-family evpn
       neighbor SPINES activate
@@ -333,18 +346,21 @@ interface Loopback0
    isis passive
 !
 interface Ethernet1
+   description "link-to-spine1"
    no switchport
    ip address 10.1.2.2/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet2
+   description "link-to-spine2"
    no switchport
    ip address 10.2.2.2/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet3
+   description "link-to-host1"
    channel-group 1 mode active
 !
 interface Port-Channel1
@@ -375,12 +391,12 @@ router isis UNDERLAY
 router bgp 65000
    router-id 10.0.0.12
    no bgp default ipv4-unicast
-   neighbor SPINES peer-group
+   neighbor SPINES peer group
    neighbor SPINES remote-as 65000
    neighbor SPINES update-source Loopback0
    neighbor SPINES send-community extended
-   neighbor 10.0.0.21 peer-group SPINES
-   neighbor 10.0.0.22 peer-group SPINES
+   neighbor 10.0.0.21 peer group SPINES
+   neighbor 10.0.0.22 peer group SPINES
    !
    address-family evpn
       neighbor SPINES activate
@@ -415,18 +431,21 @@ interface Loopback0
    isis passive
 !
 interface Ethernet1
+   description "link-to-spine1"
    no switchport
    ip address 10.1.3.2/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet2
+   description "link-to-spine2"
    no switchport
    ip address 10.2.3.2/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet3
+   description "link-to-host2"
    switchport access vlan 10
 !
 vlan 10
@@ -451,12 +470,12 @@ router isis UNDERLAY
 router bgp 65000
    router-id 10.0.0.13
    no bgp default ipv4-unicast
-   neighbor SPINES peer-group
+   neighbor SPINES peer group
    neighbor SPINES remote-as 65000
    neighbor SPINES update-source Loopback0
    neighbor SPINES send-community extended
-   neighbor 10.0.0.21 peer-group SPINES
-   neighbor 10.0.0.22 peer-group SPINES
+   neighbor 10.0.0.21 peer group SPINES
+   neighbor 10.0.0.22 peer group SPINES
    !
    address-family evpn
       neighbor SPINES activate
@@ -491,18 +510,21 @@ interface Loopback0
    isis passive
 !
 interface Ethernet1
+   description "link-to-spine1"
    no switchport
    ip address 10.1.4.2/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet2
+   description "link-to-spine2"
    no switchport
    ip address 10.2.4.2/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet3
+   description "link-to-host3"
    switchport access vlan 10
 !
 vlan 10
@@ -527,12 +549,12 @@ router isis UNDERLAY
 router bgp 65000
    router-id 10.0.0.14
    no bgp default ipv4-unicast
-   neighbor SPINES peer-group
+   neighbor SPINES peer group
    neighbor SPINES remote-as 65000
    neighbor SPINES update-source Loopback0
    neighbor SPINES send-community extended
-   neighbor 10.0.0.21 peer-group SPINES
-   neighbor 10.0.0.22 peer-group SPINES
+   neighbor 10.0.0.21 peer group SPINES
+   neighbor 10.0.0.22 peer group SPINES
    !
    address-family evpn
       neighbor SPINES activate
@@ -567,18 +589,21 @@ interface Loopback0
    isis passive
 !
 interface Ethernet1
+   description "link-to-spine1"
    no switchport
    ip address 10.1.5.2/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet2
+   description "link-to-spine2"
    no switchport
    ip address 10.2.5.2/30
    isis enable UNDERLAY
    isis network point-to-point
 !
 interface Ethernet3
+   description "link-to-host4"
    switchport access vlan 20
 !
 vlan 20
@@ -603,12 +628,12 @@ router isis UNDERLAY
 router bgp 65000
    router-id 10.0.0.15
    no bgp default ipv4-unicast
-   neighbor SPINES peer-group
+   neighbor SPINES peer group
    neighbor SPINES remote-as 65000
    neighbor SPINES update-source Loopback0
    neighbor SPINES send-community extended
-   neighbor 10.0.0.21 peer-group SPINES
-   neighbor 10.0.0.22 peer-group SPINES
+   neighbor 10.0.0.21 peer group SPINES
+   neighbor 10.0.0.22 peer group SPINES
    !
    address-family evpn
       neighbor SPINES activate
