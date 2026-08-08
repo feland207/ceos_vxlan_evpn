@@ -311,7 +311,7 @@ interface Port-Channel1
    switchport access vlan 10
    evpn ethernet-segment
       identifier 0000:0000:0000:1001:0001
-      route-target import 1001:1
+      route-target import 00:00:10:01:00:01
       exit
    exit
 !
@@ -412,7 +412,7 @@ interface Port-Channel1
    switchport access vlan 10
    evpn ethernet-segment
       identifier 0000:0000:0000:1001:0001
-      route-target import 1001:1
+      route-target import 00:00:10:01:00:01
       exit
    exit
 !
