@@ -101,6 +101,7 @@ interface Loopback0
    ip address 10.0.0.21/32
    isis enable UNDERLAY
    isis passive
+   exit
 !
 interface Ethernet1
    description "link-to-leaf1"
@@ -108,6 +109,7 @@ interface Ethernet1
    ip address 10.1.1.1/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet2
    description "link-to-leaf2"
@@ -115,6 +117,7 @@ interface Ethernet2
    ip address 10.1.2.1/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet3
    description "link-to-leaf3"
@@ -122,6 +125,7 @@ interface Ethernet3
    ip address 10.1.3.1/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet4
    description "link-to-leaf4"
@@ -129,6 +133,7 @@ interface Ethernet4
    ip address 10.1.4.1/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet5
    description "link-to-leaf5"
@@ -136,12 +141,15 @@ interface Ethernet5
    ip address 10.1.5.1/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 router isis UNDERLAY
    net 49.0001.0000.0000.0021.00
    is-type level-2
    log-adjacency-changes
    address-family ipv4 unicast
+      exit
+   exit
 !
 router bgp 65000
    router-id 10.0.0.21
@@ -166,6 +174,8 @@ router bgp 65000
    address-family evpn
       neighbor RR-PEER activate
       neighbor EVPN-CLIENT activate
+      exit
+   exit
 !
 ip routing
 !
@@ -181,6 +191,7 @@ interface Loopback0
    ip address 10.0.0.22/32
    isis enable UNDERLAY
    isis passive
+   exit
 !
 interface Ethernet1
    description "link-to-leaf1"
@@ -188,6 +199,7 @@ interface Ethernet1
    ip address 10.2.1.1/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet2
    description "link-to-leaf2"
@@ -195,6 +207,7 @@ interface Ethernet2
    ip address 10.2.2.1/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet3
    description "link-to-leaf3"
@@ -202,6 +215,7 @@ interface Ethernet3
    ip address 10.2.3.1/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet4
    description "link-to-leaf4"
@@ -209,6 +223,7 @@ interface Ethernet4
    ip address 10.2.4.1/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet5
    description "link-to-leaf5"
@@ -216,12 +231,15 @@ interface Ethernet5
    ip address 10.2.5.1/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 router isis UNDERLAY
    net 49.0001.0000.0000.0022.00
    is-type level-2
    log-adjacency-changes
    address-family ipv4 unicast
+      exit
+   exit
 !
 router bgp 65000
    router-id 10.0.0.22
@@ -246,6 +264,8 @@ router bgp 65000
    address-family evpn
       neighbor RR-PEER activate
       neighbor EVPN-CLIENT activate
+      exit
+   exit
 !
 ip routing
 !
@@ -258,11 +278,13 @@ end
 hostname leaf1
 !
 vrf instance TENANT_A
+   exit
 !
 interface Loopback0
    ip address 10.0.0.11/32
    isis enable UNDERLAY
    isis passive
+   exit
 !
 interface Ethernet1
    description "link-to-spine1"
@@ -270,6 +292,7 @@ interface Ethernet1
    ip address 10.1.1.2/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet2
    description "link-to-spine2"
@@ -277,35 +300,44 @@ interface Ethernet2
    ip address 10.2.1.2/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet3
    description "link-to-host1"
    channel-group 1 mode active
+   exit
 !
 interface Port-Channel1
    switchport access vlan 10
    evpn ethernet-segment
       identifier 0000:0000:0000:1001:0001
       route-target import 1001:1
+      exit
+   exit
 !
 vlan 10
    name TENANT_A_WEB
+   exit
 !
 interface Vlan10
    vrf TENANT_A
    ip address virtual 192.168.10.1/24
+   exit
 !
 interface Vxlan1
    vxlan source-interface Loopback0
    vxlan udp-port 4789
    vxlan vlan 10 vni 10010
    vxlan vrf TENANT_A vni 50010
+   exit
 !
 router isis UNDERLAY
    net 49.0001.0000.0000.0011.00
    is-type level-2
    log-adjacency-changes
    address-family ipv4 unicast
+      exit
+   exit
 !
 router bgp 65000
    router-id 10.0.0.11
@@ -319,17 +351,21 @@ router bgp 65000
    !
    address-family evpn
       neighbor SPINES activate
+      exit
    !
    vlan 10
       rd 10.0.0.11:10
       route-target both 10:10
       redistribute learned
+      exit
    !
    vrf TENANT_A
       rd 10.0.0.11:100
       route-target import evpn 100:100
       route-target export evpn 100:100
       redistribute connected
+      exit
+   exit
 !
 ip routing
 ip routing vrf TENANT_A
@@ -343,11 +379,13 @@ end
 hostname leaf2
 !
 vrf instance TENANT_A
+   exit
 !
 interface Loopback0
    ip address 10.0.0.12/32
    isis enable UNDERLAY
    isis passive
+   exit
 !
 interface Ethernet1
    description "link-to-spine1"
@@ -355,6 +393,7 @@ interface Ethernet1
    ip address 10.1.2.2/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet2
    description "link-to-spine2"
@@ -362,35 +401,44 @@ interface Ethernet2
    ip address 10.2.2.2/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet3
    description "link-to-host1"
    channel-group 1 mode active
+   exit
 !
 interface Port-Channel1
    switchport access vlan 10
    evpn ethernet-segment
       identifier 0000:0000:0000:1001:0001
       route-target import 1001:1
+      exit
+   exit
 !
 vlan 10
    name TENANT_A_WEB
+   exit
 !
 interface Vlan10
    vrf TENANT_A
    ip address virtual 192.168.10.1/24
+   exit
 !
 interface Vxlan1
    vxlan source-interface Loopback0
    vxlan udp-port 4789
    vxlan vlan 10 vni 10010
    vxlan vrf TENANT_A vni 50010
+   exit
 !
 router isis UNDERLAY
    net 49.0001.0000.0000.0012.00
    is-type level-2
    log-adjacency-changes
    address-family ipv4 unicast
+      exit
+   exit
 !
 router bgp 65000
    router-id 10.0.0.12
@@ -404,17 +452,21 @@ router bgp 65000
    !
    address-family evpn
       neighbor SPINES activate
+      exit
    !
    vlan 10
       rd 10.0.0.12:10
       route-target both 10:10
       redistribute learned
+      exit
    !
    vrf TENANT_A
       rd 10.0.0.12:100
       route-target import evpn 100:100
       route-target export evpn 100:100
       redistribute connected
+      exit
+   exit
 !
 ip routing
 ip routing vrf TENANT_A
@@ -428,11 +480,13 @@ end
 hostname leaf3
 !
 vrf instance TENANT_A
+   exit
 !
 interface Loopback0
    ip address 10.0.0.13/32
    isis enable UNDERLAY
    isis passive
+   exit
 !
 interface Ethernet1
    description "link-to-spine1"
@@ -440,6 +494,7 @@ interface Ethernet1
    ip address 10.1.3.2/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet2
    description "link-to-spine2"
@@ -447,29 +502,36 @@ interface Ethernet2
    ip address 10.2.3.2/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet3
    description "link-to-host2"
    switchport access vlan 10
+   exit
 !
 vlan 10
    name TENANT_A_WEB
+   exit
 !
 interface Vlan10
    vrf TENANT_A
    ip address virtual 192.168.10.1/24
+   exit
 !
 interface Vxlan1
    vxlan source-interface Loopback0
    vxlan udp-port 4789
    vxlan vlan 10 vni 10010
    vxlan vrf TENANT_A vni 50010
+   exit
 !
 router isis UNDERLAY
    net 49.0001.0000.0000.0013.00
    is-type level-2
    log-adjacency-changes
    address-family ipv4 unicast
+      exit
+   exit
 !
 router bgp 65000
    router-id 10.0.0.13
@@ -483,17 +545,21 @@ router bgp 65000
    !
    address-family evpn
       neighbor SPINES activate
+      exit
    !
    vlan 10
       rd 10.0.0.13:10
       route-target both 10:10
       redistribute learned
+      exit
    !
    vrf TENANT_A
       rd 10.0.0.13:100
       route-target import evpn 100:100
       route-target export evpn 100:100
       redistribute connected
+      exit
+   exit
 !
 ip routing
 ip routing vrf TENANT_A
@@ -507,11 +573,13 @@ end
 hostname leaf4
 !
 vrf instance TENANT_A
+   exit
 !
 interface Loopback0
    ip address 10.0.0.14/32
    isis enable UNDERLAY
    isis passive
+   exit
 !
 interface Ethernet1
    description "link-to-spine1"
@@ -519,6 +587,7 @@ interface Ethernet1
    ip address 10.1.4.2/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet2
    description "link-to-spine2"
@@ -526,29 +595,36 @@ interface Ethernet2
    ip address 10.2.4.2/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet3
    description "link-to-host3"
    switchport access vlan 10
+   exit
 !
 vlan 10
    name TENANT_A_WEB
+   exit
 !
 interface Vlan10
    vrf TENANT_A
    ip address virtual 192.168.10.1/24
+   exit
 !
 interface Vxlan1
    vxlan source-interface Loopback0
    vxlan udp-port 4789
    vxlan vlan 10 vni 10010
    vxlan vrf TENANT_A vni 50010
+   exit
 !
 router isis UNDERLAY
    net 49.0001.0000.0000.0014.00
    is-type level-2
    log-adjacency-changes
    address-family ipv4 unicast
+      exit
+   exit
 !
 router bgp 65000
    router-id 10.0.0.14
@@ -562,17 +638,21 @@ router bgp 65000
    !
    address-family evpn
       neighbor SPINES activate
+      exit
    !
    vlan 10
       rd 10.0.0.14:10
       route-target both 10:10
       redistribute learned
+      exit
    !
    vrf TENANT_A
       rd 10.0.0.14:100
       route-target import evpn 100:100
       route-target export evpn 100:100
       redistribute connected
+      exit
+   exit
 !
 ip routing
 ip routing vrf TENANT_A
@@ -586,11 +666,13 @@ end
 hostname leaf5
 !
 vrf instance TENANT_B
+   exit
 !
 interface Loopback0
    ip address 10.0.0.15/32
    isis enable UNDERLAY
    isis passive
+   exit
 !
 interface Ethernet1
    description "link-to-spine1"
@@ -598,6 +680,7 @@ interface Ethernet1
    ip address 10.1.5.2/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet2
    description "link-to-spine2"
@@ -605,29 +688,36 @@ interface Ethernet2
    ip address 10.2.5.2/30
    isis enable UNDERLAY
    isis network point-to-point
+   exit
 !
 interface Ethernet3
    description "link-to-host4"
    switchport access vlan 20
+   exit
 !
 vlan 20
    name TENANT_B_APP
+   exit
 !
 interface Vlan20
    vrf TENANT_B
    ip address virtual 192.168.20.1/24
+   exit
 !
 interface Vxlan1
    vxlan source-interface Loopback0
    vxlan udp-port 4789
    vxlan vlan 20 vni 10020
    vxlan vrf TENANT_B vni 50020
+   exit
 !
 router isis UNDERLAY
    net 49.0001.0000.0000.0015.00
    is-type level-2
    log-adjacency-changes
    address-family ipv4 unicast
+      exit
+   exit
 !
 router bgp 65000
    router-id 10.0.0.15
@@ -641,17 +731,21 @@ router bgp 65000
    !
    address-family evpn
       neighbor SPINES activate
+      exit
    !
    vlan 20
       rd 10.0.0.15:20
       route-target both 20:20
       redistribute learned
+      exit
    !
    vrf TENANT_B
       rd 10.0.0.15:200
       route-target import evpn 200:200
       route-target export evpn 200:200
       redistribute connected
+      exit
+   exit
 !
 ip routing
 ip routing vrf TENANT_B
