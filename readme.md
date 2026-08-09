@@ -310,7 +310,7 @@ interface Port-Channel1
    evpn ethernet-segment
       identifier 0000:0000:0000:1001:0001
       route-target import 00:00:10:01:00:01
-      exit
+      lacp system-id 0000.1001.0001
    exit
 !
 vlan 10
@@ -411,7 +411,7 @@ interface Port-Channel1
    evpn ethernet-segment
       identifier 0000:0000:0000:1001:0001
       route-target import 00:00:10:01:00:01
-      exit
+      lacp system-id 0000.1001.0001
    exit
 !
 vlan 10
@@ -842,15 +842,18 @@ ready to carry the iBGP EVPN sessions.
 
 ```
 show bgp evpn summary                       ! all sessions Established
+show bgp evpn route-type auto-discovery     ! Type-1 per-ES (Ethernet Auto-Discovery, per Ethernet Segment)
 show bgp evpn route-type imet               ! Type-3 (Inclusive Multicast — VTEP/VNI discovery)
 show bgp evpn route-type mac-ip             ! Type-2 (MAC/IP — host reachability)
 show bgp evpn route-type ip-prefix ipv4     ! Type-5 (IP-Prefix — subnet routes from redistribute connected)
-show bgp evpn instance                      ! per-VNI RD/RT/route counts
+show bgp evpn instance                      ! per-VNI RD/RT/route counts | See the DF (Designated Forwarder) elected
 ```
 
 ### 4.5 VXLAN data plane
 
 ```
+show vlan
+show vxlan vni
 show vxlan vtep                    ! confirm remote VTEP loopbacks discovered
 show vxlan address-table           ! MAC-to-VTEP mapping learned via EVPN
 show interfaces vxlan1
@@ -859,9 +862,10 @@ show interfaces vxlan1
 ### 4.6 ESI / multihoming (on leaf1 and leaf2)
 
 ```
-show bgp evpn route-type ethernet-segment
-show bgp evpn route-type ethernet-segment detail
+show bgp evpn route-type ethernet-segment             ! Type-4 (Ethernet Segment route | ES-Import Route Target mechanism)
+show bgp evpn route-type ethernet-segment detail      ! Type-4 (Ethernet Segment route | ES-Import Route Target mechanism)
 show port-channel
+show lacp peer
 
 # Seeing learned MAC addresses
 show mac address-table vlan 10
