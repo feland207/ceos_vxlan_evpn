@@ -864,6 +864,7 @@ show interfaces vxlan1
 ```
 show bgp evpn route-type ethernet-segment             ! Type-4 (Ethernet Segment route | ES-Import Route Target mechanism)
 show bgp evpn route-type ethernet-segment detail      ! Type-4 (Ethernet Segment route | ES-Import Route Target mechanism)
+show vxlan flood vtep
 show port-channel
 show lacp peer
 
