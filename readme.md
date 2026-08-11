@@ -869,6 +869,7 @@ show port-channel
 show lacp peer
 
 # Seeing learned MAC addresses
+show mac address-table
 show mac address-table vlan 10
 show bgp evpn route-type mac-ip
 show vxlan address-table
