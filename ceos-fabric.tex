@@ -130,14 +130,14 @@ VRF TENANT\_B       & \texttt{<leaf-loopback>:200} & 200:200 \\
 \textit{That's intended VRF isolation, not a bug --- good talking point for the interview.}
 }
 
-\subsection*{ESI (ethernet-segment) for host1's dual-homed link}
+\subsection*{ESI (ethernet-segment) for host1 dual-homed link}
 
 \begin{tabular}{lll}
 \toprule
 \textbf{Leaf} & \textbf{Port} & \textbf{ESI} \\
 \midrule
-leaf1 & Port-Channel1 & \texttt{0000:0000:0000:1001:0001} \\
-leaf2 & Port-Channel1 & \texttt{0000:0000:0000:1001:0001} (same ESI = same Ethernet Segment) \\
+leaf1 & Port-Channel10 & \texttt{0000:0000:0001:0002:0012} \\
+leaf2 & Port-Channel10 & \texttt{0000:0000:0001:0002:0012} (same ESI = same Ethernet Segment) \\
 \bottomrule
 \end{tabular}
 

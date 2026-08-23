@@ -321,9 +321,10 @@ interface Vlan10
 interface Port-Channel10
    switchport access vlan 10
    evpn ethernet-segment
-      identifier 0000:0000:0000:1001:0001
-      route-target import 00:00:10:01:00:01
-      lacp system-id 0000.1001.0001
+      ! Best practice is to use exact same ESI and LACP system ID to uniquely identify the shared segment
+      identifier 0000:0000:0001:0002:0012
+      route-target import 00:01:00:02:00:12
+      lacp system-id 0001.0002.0012
    exit
 !
 interface Vxlan1
@@ -351,6 +352,7 @@ router bgp 65000
    neighbor 10.0.0.21 peer group SPINES
    neighbor 10.0.0.22 peer group SPINES
    !
+   ! BGP EVPN control plane
    address-family evpn
       neighbor SPINES activate
       exit
@@ -424,9 +426,10 @@ interface Vlan10
 interface Port-Channel10
    switchport access vlan 10
    evpn ethernet-segment
-      identifier 0000:0000:0000:1001:0001
-      route-target import 00:00:10:01:00:01
-      lacp system-id 0000.1001.0001
+      ! Best practice is to use exact same ESI and LACP system ID to uniquely identify the shared segment
+      identifier 0000:0000:0001:0002:0012
+      route-target import 00:01:00:02:00:12
+      lacp system-id 0001.0002.0012
    exit
 !
 interface Vxlan1
@@ -454,6 +457,7 @@ router bgp 65000
    neighbor 10.0.0.21 peer group SPINES
    neighbor 10.0.0.22 peer group SPINES
    !
+   ! BGP EVPN control plane
    address-family evpn
       neighbor SPINES activate
       exit
@@ -549,6 +553,7 @@ router bgp 65000
    neighbor 10.0.0.21 peer group SPINES
    neighbor 10.0.0.22 peer group SPINES
    !
+   ! BGP EVPN control plane
    address-family evpn
       neighbor SPINES activate
       exit
@@ -644,6 +649,7 @@ router bgp 65000
    neighbor 10.0.0.21 peer group SPINES
    neighbor 10.0.0.22 peer group SPINES
    !
+   ! BGP EVPN control plane
    address-family evpn
       neighbor SPINES activate
       exit
@@ -739,6 +745,7 @@ router bgp 65000
    neighbor 10.0.0.21 peer group SPINES
    neighbor 10.0.0.22 peer group SPINES
    !
+   ! BGP EVPN control plane
    address-family evpn
       neighbor SPINES activate
       exit
@@ -776,8 +783,8 @@ sudo ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
 sudo ip link add bond0 type bond mode 802.3ad miimon 100 lacp_rate fast
 sudo ip link set bond0 type bond xmit_hash_policy layer3+4
 sudo ip link set eth1 down
-sudo ip link set eth1 master bond0
 sudo ip link set eth2 down
+sudo ip link set eth1 master bond0
 sudo ip link set eth2 master bond0
 sudo ip link set eth1 up
 sudo ip link set eth2 up
@@ -785,7 +792,7 @@ sudo ip link set bond0 up
 sudo ip addr add 192.168.10.31/24 dev bond0
 # sudo ip route add default via 192.168.10.1
 # Use only if need to test a specific inter-subnet path within the same VRF
-sudo ip route add <destination-subnet> via 192.168.10.1 dev bond0
+# sudo ip route add <destination-subnet> via 192.168.10.1 dev bond0
 
 # The MII (Media Independent Interface) monitoring is a feature of the Linux bonding driver that inspects the physical link state of the NICs. Setting it to 100 tells the kernel to poll the physical state of the member links (eth1 and eth2) every 100 milliseconds.
 ```
@@ -892,6 +899,7 @@ show lacp peer
 show mac address-table
 show mac address-table vlan 10
 show bgp evpn route-type mac-ip
+show bgp evpn mac
 show vxlan address-table
 ```
 
