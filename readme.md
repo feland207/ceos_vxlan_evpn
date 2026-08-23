@@ -786,6 +786,8 @@ sudo ip addr add 192.168.10.31/24 dev bond0
 # sudo ip route add default via 192.168.10.1
 # Use only if need to test a specific inter-subnet path within the same VRF
 sudo ip route add <destination-subnet> via 192.168.10.1 dev bond0
+
+# The MII (Media Independent Interface) monitoring is a feature of the Linux bonding driver that inspects the physical link state of the NICs. Setting it to 100 tells the kernel to poll the physical state of the member links (eth1 and eth2) every 100 milliseconds.
 ```
 
 ### host2 — single-homed to leaf3, VLAN10
