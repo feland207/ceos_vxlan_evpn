@@ -94,6 +94,7 @@ not a bug — good talking point for the interview.
 
 ```
 hostname spine1
+clock timezone Europe/warsaw
 !
 interface Loopback0
    ip address 10.0.0.21/32
@@ -184,6 +185,7 @@ end
 
 ```
 hostname spine2
+clock timezone Europe/warsaw
 !
 interface Loopback0
    ip address 10.0.0.22/32
@@ -274,6 +276,7 @@ end
 
 ```
 hostname leaf1
+clock timezone Europe/warsaw
 !
 vrf instance TENANT_A
    exit
@@ -302,15 +305,7 @@ interface Ethernet2
 !
 interface Ethernet3
    description "link-to-host1"
-   channel-group 1 mode active
-   exit
-!
-interface Port-Channel1
-   switchport access vlan 10
-   evpn ethernet-segment
-      identifier 0000:0000:0000:1001:0001
-      route-target import 00:00:10:01:00:01
-      lacp system-id 0000.1001.0001
+   channel-group 10 mode active
    exit
 !
 vlan 10
@@ -318,8 +313,17 @@ vlan 10
    exit
 !
 interface Vlan10
+   description "Anycast Gateway"
    vrf TENANT_A
    ip address virtual 192.168.10.1/24
+   exit
+!
+interface Port-Channel10
+   switchport access vlan 10
+   evpn ethernet-segment
+      identifier 0000:0000:0000:1001:0001
+      route-target import 00:00:10:01:00:01
+      lacp system-id 0000.1001.0001
    exit
 !
 interface Vxlan1
@@ -375,6 +379,7 @@ end
 
 ```
 hostname leaf2
+clock timezone Europe/warsaw
 !
 vrf instance TENANT_A
    exit
@@ -403,15 +408,7 @@ interface Ethernet2
 !
 interface Ethernet3
    description "link-to-host1"
-   channel-group 1 mode active
-   exit
-!
-interface Port-Channel1
-   switchport access vlan 10
-   evpn ethernet-segment
-      identifier 0000:0000:0000:1001:0001
-      route-target import 00:00:10:01:00:01
-      lacp system-id 0000.1001.0001
+   channel-group 10 mode active
    exit
 !
 vlan 10
@@ -419,8 +416,17 @@ vlan 10
    exit
 !
 interface Vlan10
+   description "Anycast Gateway"
    vrf TENANT_A
    ip address virtual 192.168.10.1/24
+   exit
+!
+interface Port-Channel10
+   switchport access vlan 10
+   evpn ethernet-segment
+      identifier 0000:0000:0000:1001:0001
+      route-target import 00:00:10:01:00:01
+      lacp system-id 0000.1001.0001
    exit
 !
 interface Vxlan1
@@ -476,6 +482,7 @@ end
 
 ```
 hostname leaf3
+clock timezone Europe/warsaw
 !
 vrf instance TENANT_A
    exit
@@ -512,6 +519,7 @@ vlan 10
    exit
 !
 interface Vlan10
+   description "Anycast Gateway"
    vrf TENANT_A
    ip address virtual 192.168.10.1/24
    exit
@@ -569,6 +577,7 @@ end
 
 ```
 hostname leaf4
+clock timezone Europe/warsaw
 !
 vrf instance TENANT_A
    exit
@@ -605,6 +614,7 @@ vlan 10
    exit
 !
 interface Vlan10
+   description "Anycast Gateway"
    vrf TENANT_A
    ip address virtual 192.168.10.1/24
    exit
@@ -662,6 +672,7 @@ end
 
 ```
 hostname leaf5
+clock timezone Europe/warsaw
 !
 vrf instance TENANT_B
    exit
@@ -698,6 +709,7 @@ vlan 20
    exit
 !
 interface Vlan20
+   description "Anycast Gateway"
    vrf TENANT_B
    ip address virtual 192.168.20.1/24
    exit
@@ -760,7 +772,9 @@ Run via `docker exec -it clab-ceos-fabric-<node> bash`, then as root:
 ### host1 — ESI-LAG dual-homed (bond0, LACP active, VLAN10)
 
 ```bash
-sudo ip link add bond0 type bond mode 802.3ad lacp_rate fast
+sudo ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
+sudo ip link add bond0 type bond mode 802.3ad miimon 100 lacp_rate fast
+sudo ip link set bond0 type bond xmit_hash_policy layer3+4
 sudo ip link set eth1 down
 sudo ip link set eth1 master bond0
 sudo ip link set eth2 down
@@ -777,31 +791,34 @@ sudo ip route add <destination-subnet> via 192.168.10.1 dev bond0
 ### host2 — single-homed to leaf3, VLAN10
 
 ```bash
+sudo ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
 sudo ip addr add 192.168.10.32/24 dev eth1
 sudo ip link set eth1 up
 # sudo ip route add default via 192.168.10.1
 # Use only if need to test a specific inter-subnet path within the same VRF
-sudo ip route add <destination-subnet> via 192.168.10.1 dev bond0
+# sudo ip route add <destination-subnet> via 192.168.10.1 dev bond0
 ```
 
 ### host3 — single-homed to leaf4, VLAN10
 
 ```bash
+sudo ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
 sudo ip addr add 192.168.10.33/24 dev eth1
 sudo ip link set eth1 up
 # sudo ip route add default via 192.168.10.1
 # Use only if need to test a specific inter-subnet path within the same VRF
-sudo ip route add <destination-subnet> via 192.168.10.1 dev bond0
+# sudo ip route add <destination-subnet> via 192.168.10.1 dev bond0
 ```
 
 ### host4 — single-homed to leaf5, VLAN20 / TENANT_B
 
 ```bash
+sudo ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
 sudo ip addr add 192.168.20.34/24 dev eth1
 sudo ip link set eth1 up
 # sudo ip route add default via 192.168.20.1
 # Use only if need to test a specific inter-subnet path within the same VRF
-sudo ip route add <destination-subnet> via 192.168.20.1 dev eth1
+# sudo ip route add <destination-subnet> via 192.168.20.1 dev eth1
 ```
 
 ---
@@ -822,6 +839,7 @@ show isis interface brief          ! confirm P2P interfaces are "Up"
 show isis neighbors                ! adjacency state should show "UP"
 show isis database                 ! confirm all 7 system-IDs present
 show ip route isis                 ! confirm all loopbacks learned via ISIS
+show isis summary
 ```
 
 ### 4.3 Ping to loopbacks (run from any node, sourced from its own Loopback0)
@@ -880,11 +898,15 @@ show vxlan address-table
 ## 5. Host validation (inside each Linux container)
 
 ```bash
+# Validate with
+ping <destination-ip>
 ip addr show
+ip neigh show
 ip route show
 
 # host1 only — confirm LACP bond is up with both links active
-cat /proc/net/bonding/bond0
+less /proc/net/bonding/bond0
+cat /sys/class/net/bond0/bonding/xmit_hash_policy
 
 # host2 -> ping gateway and host2's L2-stretch peer (host3, different leaf, same VNI)
 ping -c4 192.168.10.1
