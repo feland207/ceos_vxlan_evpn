@@ -365,6 +365,7 @@ router bgp 65000
    !
    vrf TENANT_A
       rd 10.0.0.11:100
+      route-target import evpn 200:200
       route-target import evpn 100:100
       route-target export evpn 100:100
       redistribute connected
@@ -470,6 +471,7 @@ router bgp 65000
    !
    vrf TENANT_A
       rd 10.0.0.12:100
+      route-target import evpn 200:200
       route-target import evpn 100:100
       route-target export evpn 100:100
       redistribute connected
@@ -758,6 +760,7 @@ router bgp 65000
    !
    vrf TENANT_B
       rd 10.0.0.15:200
+      route-target import evpn 100:100
       route-target import evpn 200:200
       route-target export evpn 200:200
       redistribute connected
@@ -839,6 +842,8 @@ sudo ip link set eth1 up
 ```
 show interfaces description
 show interfaces status
+# See the system MAC address
+show version | i MAC
 ```
 
 ### 4.2 ISIS underlay
@@ -868,6 +873,7 @@ ready to carry the iBGP EVPN sessions.
 ### 4.4 BGP EVPN overlay
 
 ```
+show ip route vrf <VRF-NAME>
 show bgp evpn summary                       ! all sessions Established
 show bgp evpn route-type auto-discovery     ! Type-1 per-ES (Ethernet Auto-Discovery, per Ethernet Segment)
 show bgp evpn route-type imet               ! Type-3 (Inclusive Multicast — VTEP/VNI discovery)
