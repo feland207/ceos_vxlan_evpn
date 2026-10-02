@@ -33,12 +33,6 @@ We should see that leaf3 performed Ingress Replication and duplicated the unicas
 
 host2,host3,host4 - They sit on the same L2 subnet across three distinct VTEPs.
 
-config example host2
-```
-sudo ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
-sudo ip addr add 192.168.10.32/24 dev eth1
-sudo ip link set eth1 up
-```
 
 ###### leaf3,leaf4,leaf5 Configuration Strategy
 
@@ -112,7 +106,11 @@ vlan 10
 !
 interface Ethernet3
    description link-to-host4
-   switchport mode trunk
+   ! ! Just adding a vlan to a port, does not make it Dot1q. All 802.1Q tagged frames are dropped
+   ! ! switchport mode access takes precedence (is the Default when switchport mode trunk is missing)
+   switchport access vlan 10
+   ! ! Untagged traffic defaults to the native vlan 1 (we need Dot1q in the host port)
+   ! ! Ignored if we dont add switchport mode trunk
    switchport trunk allowed vlan 10,20
 !
 interface Vxlan1

@@ -3,7 +3,8 @@
 Topology: `ceos_clos.yml` (2 spines, 5 leaves, 4 hosts) — mgmt network `172.60.60.0/24`
 
 Design: ISIS underlay (single area), single-AS iBGP overlay, spine1/spine2 as
-Route-Reflectors, VLAN-based EVPN service model, symmetric IRB with two VRFs.
+Route-Reflectors, VLAN-based EVPN service model, symmetric IRB 
+(Integrated Routing and Bridging) with two VRFs.
 
 ---
 
@@ -902,6 +903,7 @@ show vxlan vni
 show vxlan vtep                    ! confirm remote VTEP loopbacks discovered
 show vxlan flood vtep
 show interfaces vxlan1
+show interfaces eth3 switchport
 ```
 
 ### 4.6 ESI / multihoming (on leaf1 and leaf2)
@@ -917,7 +919,7 @@ show lacp peer
 show mac address-table
 show mac address-table vlan 10
 show vxlan address-table                              ! MAC-to-VTEP mapping learned via EVPN
-show bgp evpn route-type mac-ip
+show bgp evpn route-type mac-ip                       ! Type-2 MAC routes learned via BGP
 show bgp evpn mac
 ```
 
