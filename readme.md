@@ -178,6 +178,8 @@ router bgp 65000
 !
 ip routing
 !
+mac address-table aging-time 120
+!
 end
 ```
 
@@ -268,6 +270,8 @@ router bgp 65000
    exit
 !
 ip routing
+!
+mac address-table aging-time 120
 !
 end
 ```
@@ -375,6 +379,8 @@ router bgp 65000
 ip routing
 ip routing vrf TENANT_A
 !
+mac address-table aging-time 120
+!
 end
 ```
 
@@ -481,6 +487,8 @@ router bgp 65000
 ip routing
 ip routing vrf TENANT_A
 !
+mac address-table aging-time 120
+!
 end
 ```
 
@@ -577,6 +585,8 @@ router bgp 65000
 ip routing
 ip routing vrf TENANT_A
 !
+mac address-table aging-time 120
+!
 end
 ```
 
@@ -672,6 +682,8 @@ router bgp 65000
 !
 ip routing
 ip routing vrf TENANT_A
+!
+mac address-table aging-time 120
 !
 end
 ```
@@ -888,7 +900,7 @@ show bgp evpn instance                      ! per-VNI RD/RT/route counts | See t
 show vlan
 show vxlan vni
 show vxlan vtep                    ! confirm remote VTEP loopbacks discovered
-show vxlan address-table           ! MAC-to-VTEP mapping learned via EVPN
+show vxlan flood vtep
 show interfaces vxlan1
 ```
 
@@ -904,9 +916,20 @@ show lacp peer
 # Seeing learned MAC addresses
 show mac address-table
 show mac address-table vlan 10
+show vxlan address-table                              ! MAC-to-VTEP mapping learned via EVPN
 show bgp evpn route-type mac-ip
 show bgp evpn mac
-show vxlan address-table
+```
+
+### 4.7 ARP Cache vs. MAC Table & Viewing Timers
+ARP cache timeout is longer than the MAC table aging time.
+```
+show bridge mac address-table aging timeout
+show ip arp (or show arp)
+show ip arp summary
+clear arp-cache
+clear mac address-table dynamic
+sudo ip neigh flush all         # On the Linux hosts
 ```
 
 ---
@@ -937,4 +960,7 @@ ping -c4 192.168.20.1
 
 # Expected to FAIL by design (different VRF, no RT leak — proves tenant isolation):
 ping -c4 192.168.10.32
+
+# Run a packet capture on any interface from a leaf on port 4789 (UDP) for VXLAN:
+docker exec -i clab-ceos-fabric-leaf3 tcpdump -U -nni any port 4789 -w - > leaf3_any_iface.pcap
 ```
