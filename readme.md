@@ -888,6 +888,9 @@ ready to carry the iBGP EVPN sessions.
 ```
 show ip route vrf <VRF-NAME>
 show bgp evpn summary                       ! all sessions Established
+! BGP EVPN prefixes received/advertised
+show bgp neighbors <neighbor> evpn received-routes
+show bgp neighbors <neighbor> evpn advertised-routes
 show bgp evpn route-type auto-discovery     ! Type-1 per-ES (Ethernet Auto-Discovery, per Ethernet Segment)
 show bgp evpn route-type imet               ! Type-3 (Inclusive Multicast — VTEP/VNI discovery)
 show bgp evpn route-type mac-ip             ! Type-2 (MAC/IP — host reachability)
@@ -920,7 +923,7 @@ show mac address-table
 show mac address-table vlan 10
 show vxlan address-table                              ! MAC-to-VTEP mapping learned via EVPN
 show bgp evpn route-type mac-ip                       ! Type-2 MAC routes learned via BGP + Host IP address
-show bgp evpn mac
+show bgp evpn mac                                     ! Type-2 MAC routes learned via BGP + Host IP address + L2VNI + VLAN
 ```
 
 ### 4.7 ARP Cache vs. MAC Table & Viewing Timers

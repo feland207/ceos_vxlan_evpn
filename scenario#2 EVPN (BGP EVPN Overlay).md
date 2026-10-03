@@ -107,6 +107,7 @@ ip routing vrf TENANT_B
 ! ! This has nothing to do with the Ethernet Segment Identifier (ESI) 
 ! ! Can be any valid unicast MAC address, but it must be the exact same across all leaves that share that Anycast Gateway.
 ip virtual-router mac-address 00:1c:73:00:00:99
+! ! After configuring my lab, I see the virtual-router mac-address was not really needed.
 !
 vrf instance TENANT_B
    exit
@@ -125,8 +126,9 @@ interface Vlan20
 interface Ethernet3
    description "link-to-host4"
    switchport mode trunk
+   ! host4 port eth1.10
    ! host4 port eth1.20
-   switchport trunk allowed vlan 20
+   switchport trunk allowed vlan 10,20
 !
 router bgp 65000
    router-id 10.0.0.15
@@ -163,7 +165,9 @@ router bgp 65000
 interface Vxlan1
    vxlan source-interface Loopback0
    vxlan udp-port 4789
-   ! Map VRF to L2VNI 10020; Required for Type-2 (MAC/IP) and Type-3 (IMET) routes
+   ! Map VRF to L2VNI 10010; Required for Type-2 (MAC/IP) vlan10 and Type-3 (IMET) routes
+   vxlan vlan 10 vni 10010
+   ! Map VRF to L2VNI 10020; Required for Type-2 (MAC/IP) vlan20 and Type-3 (IMET) routes
    vxlan vlan 20 vni 10020
    ! Map VRF to L3VNI 50020; Required for Type-5 routes to carry the prefix payload
    vxlan vrf TENANT_B vni 50020
@@ -171,3 +175,92 @@ interface Vxlan1
 !
 end
 ```
+
+###### host2,host3,host4 Configuration Strategy
+host2 (single-homed to leaf3, VLAN 10)
+```
+sudo ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
+sudo ip addr add 192.168.10.32/24 dev eth1
+sudo ip link set eth1 up
+```
+host3 (single-homed to leaf4, VLAN 10)
+```
+sudo ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
+sudo ip addr add 192.168.10.33/24 dev eth1
+sudo ip link set eth1 up
+```
+host4 (single-homed to leaf5, VLAN 10 and VLAN 20 under vrf TENANT_B)
+```
+sudo ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
+sudo ip link add link eth1 name eth1.10 type vlan id 10
+sudo ip link add link eth1 name eth1.20 type vlan id 20
+sudo ip addr add 192.168.10.34/24 dev eth1.10
+sudo ip addr add 192.168.20.34/24 dev eth1.20
+sudo ip link set eth1.10 up
+sudo ip link set eth1.20 up
+```
+
+##### Validations
+1. host2 can ping to host3 and host4 over vlan10 (using L2VNI 10010)
+2. leaf5 generates a type-5 route for the vlan20 prefix (using rd 10.0.0.15:200 and L3VNI 50020); The IP route is visible for leaf3 and leaf4
+
+NOTE: Advertising both the Type-2 host routes and the Type-5 subnet route "ensures connectivity to the remote subnet even when no host on the subnet has been learned" (e.g., if a host is silent and its Type-2 route ages out).
+
+### Single VRF / L3 routing
+One VRF to rule them all vlans (TENANT_B)
+
+To add on leaf3 and leaf4:
+```
+ip routing vrf TENANT_B
+!
+vrf instance TENANT_B
+   exit
+!
+vlan 10
+   ! VLAN 10 (Web), VLAN 20 (App) all part of the vrf TENANT_B (for the ne VRF containing multiple VLANs/subnets is the industry best practice)
+   name TENANT_B_WEB
+   exit
+!
+! Anycast Gateway SVI
+interface Vlan10
+   description "Anycast Gateway"
+   vrf TENANT_B
+   ip address virtual 192.168.10.1/24
+   exit
+!
+interface Vxlan1
+   vxlan source-interface Loopback0
+   vxlan udp-port 4789
+   vxlan vlan 10 vni 10010
+   vxlan vrf TENANT_B vni 50020
+   exit
+!
+```
+To add on leaf3:
+```
+router bgp 65000
+   vrf TENANT_B
+      rd 10.0.0.13:200
+      route-target import evpn 200:200
+      route-target export evpn 200:200
+      redistribute connected
+      exit
+   exit
+!
+```
+To add on leaf4:
+```
+router bgp 65000
+   vrf TENANT_B
+      rd 10.0.0.14:200
+      route-target import evpn 200:200
+      route-target export evpn 200:200
+      redistribute connected
+      exit
+   exit
+!
+```
+
+##### Validations
+1. leaves3-5 have the type-5 route for both vlan10 and vlan20 prefixes (using L3VNI 50020)
+2. host2 can ping host4 from vlan10 to vlan20 (using the type-5 route)
