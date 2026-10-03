@@ -891,7 +891,7 @@ show bgp evpn summary                       ! all sessions Established
 show bgp evpn route-type auto-discovery     ! Type-1 per-ES (Ethernet Auto-Discovery, per Ethernet Segment)
 show bgp evpn route-type imet               ! Type-3 (Inclusive Multicast — VTEP/VNI discovery)
 show bgp evpn route-type mac-ip             ! Type-2 (MAC/IP — host reachability)
-show bgp evpn route-type ip-prefix ipv4     ! Type-5 (IP-Prefix — subnet routes from redistribute connected)
+show bgp evpn route-type ip-prefix ipv4     ! Type-5 (IP-Prefixes only — subnet routes from redistribute connected)
 show bgp evpn instance                      ! per-VNI RD/RT/route counts | See the DF (Designated Forwarder) elected
 ```
 
@@ -919,7 +919,7 @@ show lacp peer
 show mac address-table
 show mac address-table vlan 10
 show vxlan address-table                              ! MAC-to-VTEP mapping learned via EVPN
-show bgp evpn route-type mac-ip                       ! Type-2 MAC routes learned via BGP
+show bgp evpn route-type mac-ip                       ! Type-2 MAC routes learned via BGP + Host IP address
 show bgp evpn mac
 ```
 
