@@ -1,6 +1,7 @@
 ### EVPN (BGP EVPN Overlay)
 Control-plane based MAC learning, where MAC/IP bindings are advertised across the fabric using MP-BGP Type-2 routes rather than data-plane flooding.   
 We will test:
+- A leaf switch only advertises a Type-2 route after a local host speaks
 - The same-subnet L2 extension across host2 (leaf3) and host3 (leaf4); Layer 2 EVPN bridging
 - Inter-VRF / inter-subnet L3 routing via Type-5 routes across host1/host2/host3 (TENANT_A) and host4 (TENANT_B on leaf5); Layer 3 EVPN (IP-VRF), we need a Anycast Gateway. For this to work, we must assign an IP address to every Leaf we want to be the 'gateway' for our servers.
 
@@ -264,3 +265,4 @@ router bgp 65000
 ##### Validations
 1. leaves3-5 have the type-5 route for both vlan10 and vlan20 prefixes (using L3VNI 50020)
 2. host2 can ping host4 from vlan10 to vlan20 (using the type-5 route)
+3. wireshark packet capture on leaf3 to the spines show type-5 and type-3 (VTEP discovery) routes; Fil;ter by bgp.evpn.nlri.rt == 3

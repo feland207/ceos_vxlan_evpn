@@ -6,6 +6,9 @@ Design: ISIS underlay (single area), single-AS iBGP overlay, spine1/spine2 as
 Route-Reflectors, VLAN-based EVPN service model, symmetric IRB 
 (Integrated Routing and Bridging) with two VRFs.
 
+- For single-homed servers (like host2, host3, and host4 in ceos_clos.yml), BGP EVPN Overlay advertises Type-2 (MAC/IP), Type-3 (IMET), and Type-5 (IP Prefix) routes.
+- For multihomed servers (like host1 connected to leaf1 and leaf2), BGP EVPN Overlay advertises those exact same Type-2, 3, and 5 routes plus Type-1 and Type-4 ESI routes.
+
 ---
 
 ## 1. IP Plan
@@ -886,7 +889,7 @@ ready to carry the iBGP EVPN sessions.
 ### 4.4 BGP EVPN overlay
 
 ```
-show ip route vrf <VRF-NAME>
+show ip route vrf <VRF-NAME>                ! see the route via VTEP 10.0.0.15 VNI 50020 router-mac 00:1c:73:de:73:e9 local-interface Vxlan1
 show bgp evpn summary                       ! all sessions Established
 ! BGP EVPN prefixes received/advertised
 show bgp neighbors <neighbor> evpn received-routes
