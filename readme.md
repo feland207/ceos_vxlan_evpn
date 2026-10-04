@@ -898,7 +898,7 @@ show bgp evpn route-type auto-discovery     ! Type-1 per-ES (Ethernet Auto-Disco
 show bgp evpn route-type imet               ! Type-3 (Inclusive Multicast — VTEP/VNI discovery)
 show bgp evpn route-type mac-ip             ! Type-2 (MAC/IP — host reachability)
 show bgp evpn route-type ip-prefix ipv4     ! Type-5 (IP-Prefixes only — subnet routes from redistribute connected)
-show bgp evpn instance                      ! per-VNI RD/RT/route counts | See the DF (Designated Forwarder) elected
+show bgp evpn instance                      ! See the DF (Designated Forwarder) elected Type-4 route | EVPN ESI instance details
 ```
 
 ### 4.5 VXLAN data plane

@@ -265,4 +265,4 @@ router bgp 65000
 ##### Validations
 1. leaves3-5 have the type-5 route for both vlan10 and vlan20 prefixes (using L3VNI 50020)
 2. host2 can ping host4 from vlan10 to vlan20 (using the type-5 route)
-3. wireshark packet capture on leaf3 to the spines show type-5 and type-3 (VTEP discovery) routes; Fil;ter by bgp.evpn.nlri.rt == 3
+3. wireshark packet capture on leaf3 to the spines show type-5 and type-3 (VTEP discovery) routes; Filter by bgp.evpn.nlri.rt == 3
