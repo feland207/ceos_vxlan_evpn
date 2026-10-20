@@ -1,0 +1,268 @@
+
+============================================================
+  Node   : spine1
+  Target : 172.60.60.21:6030
+============================================================
+
+  gNMI version     : n/a
+  Encodings        : json, json_ietf, ascii
+
+  Supported models : 232 advertised
+  ------------------------------------------------------
+
+  [Arista Networks]
+    arista-segmentation.v1                                  ver: 
+    vlan-translation                                        ver: 
+
+  [Arista Networks <http://arista.com/>]
+    arista-acl-spec                                         ver: 0.1.0
+    arista-ale-counters-open-config-control-plane-traffic-counters ver: 1.0.0
+    arista-ale-counters-open-config-hardware-drop-counters  ver: 1.0.0
+    arista-ale-counters-open-config-interrupt-counters      ver: 1.0.0
+    arista-ale-counters-open-config-specialized-counters    ver: 1.0.0
+    arista-arnet-conn-tuple                                 ver: 0.1.0
+    arista-arnet-ip                                         ver: 0.1.0
+    arista-arnet-rate                                       ver: 0.1.0
+    arista-arnet-vrf-name                                   ver: 0.1.0
+    arista-bfd-augments                                     ver: 1.1.0
+    arista-bgp-common-augments                              ver: 1.0.0
+    arista-ebra-intf-encap                                  ver: 1.0.0
+    arista-ebra-vlan-tag                                    ver: 1.0.0
+    arista-ebra-vlan-tpid                                   ver: 1.0.0
+    arista-eos-types                                        ver: 
+    arista-exp-eos                                          ver: 
+    arista-exp-eos-igmpsnooping                             ver: 
+    arista-exp-eos-mlag                                     ver: 
+    arista-exp-eos-multicast                                ver: 
+    arista-exp-eos-qos                                      ver: 
+    arista-exp-eos-qos-acl-config                           ver: 
+    arista-exp-eos-qos-config                               ver: 0.2.0
+    arista-exp-eos-varp-intf                                ver: 
+    arista-exp-eos-vxlan                                    ver: 
+    arista-exp-eos-vxlan-config                             ver: 0.2.1
+    arista-fhrp-fhrp-config                                 ver: 1.0.0
+    arista-fhrp-fhrp-status                                 ver: 1.0.0
+    arista-interfaces-rates                                 ver: 0.1.0
+    arista-intf-augments                                    ver: 1.7.3
+    arista-intf-intf                                        ver: 0.1.0
+    arista-l1-open-config-optical-channel-model-aug         ver: 1.0.0
+    arista-l1-open-config-phy-model                         ver: 1.0.0
+    arista-l1-open-config-platform-model-aug                ver: 1.0.0
+    arista-l1-open-config-xcvr-oc-types                     ver: 1.0.0
+    arista-lacp-augments                                    ver: 1.0.1
+    arista-management-active-management-active-oc-redundancy-state ver: 1.0.0
+    arista-mpls-augments                                    ver: 1.3.1
+    arista-nat-nat                                          ver: 1.0.0
+    arista-nat-nat-dynamic                                  ver: 0.1.0
+    arista-netinst-augments                                 ver: 1.3.0
+    arista-pim-augments                                     ver: 1.0.1
+    arista-pseudowire-pseudowire-status                     ver: 1.0.0
+    arista-rcf-rcf-open-config                              ver: 1.0.0
+    arista-relay-agent-deviations                           ver: 1.0.1
+    arista-rpol-augments                                    ver: 1.0.3
+    arista-sand-control-plane-traffic-counters              ver: 1.0.0
+    arista-sand-hardware-drop-counters                      ver: 1.0.0
+    arista-system-session                                   ver: 0.1.0
+    arista-traffic-policy                                   ver: 1.0.0
+    arista-tunnel-tunnel-basic-types                        ver: 1.0.0
+    arista-vlan-augments                                    ver: 1.1.2
+    arista-vlan-deviations                                  ver: 1.0.2
+    openconfig-isis-flex-algo                               ver: 0.6.1
+
+  [Arista Networks, Inc.]
+    arista-acl-deviations                                   ver: 1.1.0
+    arista-acl-notsupported-deviations                      ver: 
+    arista-aft-augments                                     ver: 1.0.1
+    arista-bfd-deviations                                   ver: 1.0.1
+    arista-bfd-notsupported-deviations                      ver: 
+    arista-bgp-augments                                     ver: 2.26.0
+    arista-bgp-deviations                                   ver: 1.27.1
+    arista-cli                                              ver: 
+    arista-defined-sets-notsupported-deviations             ver: 
+    arista-exp-eos-bgp                                      ver: 1.3.0
+    arista-exp-eos-evpn                                     ver: 
+    arista-exp-eos-l2protocolforwarding                     ver: 
+    arista-flex-algo-augments                               ver: 1.0.0
+    arista-flex-algo-deviations                             ver: 1.0.0
+    arista-gnoi-cert                                        ver: 
+    arista-interfaces-notsupported-deviations               ver: 
+    arista-intf-deviations                                  ver: 1.0.6
+    arista-isis-augments                                    ver: 1.13.0
+    arista-isis-deviations                                  ver: 1.9.0
+    arista-keychain-notsupported-deviations                 ver: 
+    arista-lacp-deviations                                  ver: 1.1.4
+    arista-lacp-notsupported-deviations                     ver: 
+    arista-lldp-augments                                    ver: 1.0.1
+    arista-lldp-deviations                                  ver: 1.1.0
+    arista-lldp-notsupported-deviations                     ver: 
+    arista-local-routing-deviations                         ver: 1.0.5
+    arista-macsec-deviations                                ver: 1.0.0
+    arista-macsec-notsupported-deviations                   ver: 
+    arista-messages-notsupported-deviations                 ver: 
+    arista-mpls-deviations                                  ver: 1.0.3
+    arista-netinst-deviations                               ver: 1.3.1
+    arista-network-instance-notsupported-deviations         ver: 
+    arista-ntp-augments                                     ver: 1.0.0
+    arista-openflow-deviations                              ver: 1.1.1
+    arista-ospf-augments                                    ver: 4.2.0
+    arista-ospf-deviations                                  ver: 4.2.0
+    arista-platform-notsupported-deviations                 ver: 
+    arista-qos-augments                                     ver: 0.0.4
+    arista-qos-deviations                                   ver: 1.0.0
+    arista-qos-notsupported-deviations                      ver: 
+    arista-routing-policy-notsupported-deviations           ver: 
+    arista-rpc-netconf                                      ver: 
+    arista-rpol-deviations                                  ver: 1.3.1
+    arista-sampling-notsupported-deviations                 ver: 
+    arista-sflow-augments                                   ver: 1.1.0
+    arista-sflow-deviations                                 ver: 1.0.2
+    arista-spanning-tree-notsupported-deviations            ver: 
+    arista-srte-augments                                    ver: 1.1.1
+    arista-srte-deviations                                  ver: 1.1.2
+    arista-system-augments                                  ver: 1.6.0
+    arista-system-deviations                                ver: 1.4.0
+    arista-system-notsupported-deviations                   ver: 
+    arista-telemetry-augments                               ver: 1.0.0
+    arista-telemetry-notsupported-deviations                ver: 
+    arista-terminal-device-notsupported-deviations          ver: 
+
+  [Google LLC]
+    gnsi-authz                                              ver: 
+    gnsi-certz                                              ver: 
+    gnsi-credentialz                                        ver: 
+
+  [IANA]
+    iana-if-type                                            ver: 
+
+  [IETF NETCONF (Network Configuration) Working Group]
+    ietf-netconf                                            ver: 
+    ietf-netconf-monitoring                                 ver: 
+
+  [IETF NETMOD (NETCONF Data Modeling Language) Working Group]
+    ietf-inet-types                                         ver: 
+    ietf-yang-metadata                                      ver: 
+    ietf-yang-types                                         ver: 
+
+  [IETF NETMOD (Network Modeling) Working Group]
+    ietf-interfaces                                         ver: 
+
+  [OpenConfig Hercules Working Group]
+    openconfig-hercules-interfaces                          ver: 0.2.0
+    openconfig-hercules-platform                            ver: 0.2.0
+    openconfig-hercules-qos                                 ver: 0.1.0
+
+  [OpenConfig Working Group]
+    openconfig-aft-types                                    ver: 1.1.0
+    openconfig-p4rt                                         ver: 1.0.0
+
+  [OpenConfig working group]
+    openconfig-aaa                                          ver: 1.0.0
+    openconfig-aaa-types                                    ver: 0.4.1
+    openconfig-acl                                          ver: 1.3.3
+    openconfig-aft                                          ver: 2.5.0
+    openconfig-aft-network-instance                         ver: 0.3.1
+    openconfig-aft-summary                                  ver: 0.2.0
+    openconfig-alarm-types                                  ver: 0.2.1
+    openconfig-alarms                                       ver: 0.3.2
+    openconfig-bfd                                          ver: 0.3.0
+    openconfig-bgp                                          ver: 9.7.1
+    openconfig-bgp-policy                                   ver: 7.0.0
+    openconfig-bgp-types                                    ver: 6.0.0
+    openconfig-defined-sets                                 ver: 1.0.0
+    openconfig-evpn                                         ver: 0.8.0
+    openconfig-evpn-types                                   ver: 0.2.0
+    openconfig-extensions                                   ver: 0.5.1
+    openconfig-flexalgo                                     ver: 0.1.0
+    openconfig-icmpv4-types                                 ver: 0.1.0
+    openconfig-icmpv6-types                                 ver: 0.1.1
+    openconfig-if-aggregate                                 ver: 2.4.4
+    openconfig-if-ethernet                                  ver: 2.13.0
+    openconfig-if-ip                                        ver: 3.5.1
+    openconfig-if-poe                                       ver: 0.1.1
+    openconfig-if-sdn-ext                                   ver: 0.2.0
+    openconfig-if-tunnel                                    ver: 0.1.1
+    openconfig-igmp                                         ver: 0.3.1
+    openconfig-igmp-types                                   ver: 0.1.1
+    openconfig-inet-types                                   ver: 0.7.0
+    openconfig-interfaces                                   ver: 3.7.1
+    openconfig-isis                                         ver: 1.7.0
+    openconfig-isis-lsdb-types                              ver: 0.4.2
+    openconfig-isis-policy                                  ver: 0.8.0
+    openconfig-isis-types                                   ver: 0.6.0
+    openconfig-keychain                                     ver: 0.4.0
+    openconfig-keychain-types                               ver: 0.2.0
+    openconfig-lacp                                         ver: 2.0.0
+    openconfig-license                                      ver: 0.2.0
+    openconfig-lldp                                         ver: 0.2.1
+    openconfig-lldp-types                                   ver: 0.1.1
+    openconfig-local-routing                                ver: 2.0.1
+    openconfig-macsec                                       ver: 1.1.1
+    openconfig-macsec-types                                 ver: 0.1.0
+    openconfig-messages                                     ver: 0.0.1
+    openconfig-metadata                                     ver: 0.1.0
+    openconfig-mpls                                         ver: 3.5.0
+    openconfig-mpls-ldp                                     ver: 3.2.1
+    openconfig-mpls-rsvp                                    ver: 4.0.1
+    openconfig-mpls-sr                                      ver: 3.0.1
+    openconfig-mpls-types                                   ver: 3.5.0
+    openconfig-network-instance                             ver: 4.4.1
+    openconfig-network-instance-l3                          ver: 2.0.0
+    openconfig-network-instance-types                       ver: 0.9.3
+    openconfig-openflow                                     ver: 0.1.2
+    openconfig-openflow-types                               ver: 0.2.0
+    openconfig-ospf-policy                                  ver: 0.1.3
+    openconfig-ospf-types                                   ver: 0.1.3
+    openconfig-ospfv2                                       ver: 0.5.1
+    openconfig-packet-match                                 ver: 2.1.0
+    openconfig-packet-match-types                           ver: 1.3.3
+    openconfig-pcep                                         ver: 0.1.1
+    openconfig-pf-srte                                      ver: 0.2.0
+    openconfig-pim                                          ver: 0.4.3
+    openconfig-pim-types                                    ver: 0.1.1
+    openconfig-platform                                     ver: 0.26.0
+    openconfig-platform-controller-card                     ver: 0.2.0
+    openconfig-platform-cpu                                 ver: 0.1.1
+    openconfig-platform-fabric                              ver: 0.1.0
+    openconfig-platform-fan                                 ver: 0.1.1
+    openconfig-platform-integrated-circuit                  ver: 0.3.1
+    openconfig-platform-linecard                            ver: 1.2.0
+    openconfig-platform-pipeline-counters                   ver: 0.5.1
+    openconfig-platform-port                                ver: 1.0.1
+    openconfig-platform-psu                                 ver: 0.2.1
+    openconfig-platform-transceiver                         ver: 0.14.0
+    openconfig-platform-types                               ver: 1.8.0
+    openconfig-policy-forwarding                            ver: 0.6.1
+    openconfig-policy-types                                 ver: 3.2.3
+    openconfig-procmon                                      ver: 0.4.0
+    openconfig-programming-errors                           ver: 0.1.0
+    openconfig-qos                                          ver: 0.11.2
+    openconfig-qos-types                                    ver: 0.2.1
+    openconfig-relay-agent                                  ver: 0.1.2
+    openconfig-rib-bgp                                      ver: 0.9.0
+    openconfig-rib-bgp-ext                                  ver: 0.6.0
+    openconfig-rib-bgp-types                                ver: 0.5.0
+    openconfig-routing-policy                               ver: 3.4.2
+    openconfig-sampling                                     ver: 0.1.0
+    openconfig-sampling-sflow                               ver: 1.0.0
+    openconfig-segment-routing                              ver: 0.4.1
+    openconfig-segment-routing-types                        ver: 0.2.0
+    openconfig-spanning-tree                                ver: 0.3.1
+    openconfig-spanning-tree-types                          ver: 0.4.1
+    openconfig-srte-policy                                  ver: 0.2.3
+    openconfig-system                                       ver: 2.0.0
+    openconfig-system-controlplane                          ver: 0.2.0
+    openconfig-system-grpc                                  ver: 1.0.0
+    openconfig-system-logging                               ver: 0.6.0
+    openconfig-system-terminal                              ver: 0.3.1
+    openconfig-system-utilization                           ver: 0.1.0
+    openconfig-telemetry                                    ver: 0.5.1
+    openconfig-telemetry-types                              ver: 0.4.2
+    openconfig-terminal-device                              ver: 1.9.1
+    openconfig-transport-types                              ver: 0.24.0
+    openconfig-types                                        ver: 1.0.0
+    openconfig-vlan                                         ver: 3.2.2
+    openconfig-vlan-types                                   ver: 3.2.0
+    openconfig-yang-types                                   ver: 0.3.1
+
+  ✓ Session closed cleanly
+
