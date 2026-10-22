@@ -12,6 +12,7 @@
   failed_when:
     - ip_add.rc != 0
     - "'File exists' not in ip_add.stderr"
+    - "'Address already assigned' not in ip_add.stderr"
   changed_when: ip_add.rc == 0
 
 - name: Bring {{ eth_interface }} up
