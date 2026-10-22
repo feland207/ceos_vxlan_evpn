@@ -1,25 +1,31 @@
 ---
-- name: Gather Vxlan1 interface state (JSON)
+# Use running-config check to avoid hanging `show interfaces Vxlan1 | json`
+# when the interface does not exist (EOS blocks on the JSON pipe with no output)
+- name: Check Vxlan1 in running-config
   arista.eos.eos_command:
-    commands: "show interfaces Vxlan1 | json"
-  register: vxlan_iface
+    commands: "show running-config section interface Vxlan"
+  register: vxlan_runcfg
 
-# stdout[0] is a dict when JSON parses OK; a string when the interface is absent
-- name: Detect whether Vxlan1 is present
+- name: Detect whether Vxlan1 is configured
   ansible.builtin.set_fact:
-    vxlan1_present: "{{ vxlan_iface.stdout[0] is mapping }}"
+    vxlan1_present: "{{ 'interface Vxlan1' in vxlan_runcfg.stdout[0] }}"
 
 - name: Report — scenario 1 not deployed (Vxlan1 absent)
   ansible.builtin.debug:
     msg: >-
       {{ inventory_hostname }}: Scenario 1 not deployed —
-      Vxlan1 does not exist yet.
+      Vxlan1 not found in running-config.
       Deploy first: ansible-playbook playbooks/scenario1_flood_and_learn.yml
   when: not vxlan1_present
 
 - name: Skip remaining EOS checks — Vxlan1 absent
   ansible.builtin.meta: end_host
   when: not vxlan1_present
+
+- name: Gather Vxlan1 interface state (JSON)
+  arista.eos.eos_command:
+    commands: "show interfaces Vxlan1 | json"
+  register: vxlan_iface
 
 - name: Assert Vxlan1 line protocol is up
   ansible.builtin.assert:
