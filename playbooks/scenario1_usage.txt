@@ -1,0 +1,81 @@
+Scenario 1 — Flood-and-Learn (Static VXLAN / Head-End Replication)
+====================================================================
+
+What this scenario does
+-----------------------
+Configures pure L2 flood-and-learn over VXLAN on leaf3, leaf4, and leaf5.
+No EVPN control plane. MAC learning happens in the data plane when traffic
+crosses the fabric. Each VTEP statically lists the other two VTEPs as flood
+targets (Head-End Replication).
+
+  leaf3 (VTEP 10.0.0.13) <--VXLAN--> leaf4 (10.0.0.14) <--VXLAN--> leaf5 (10.0.0.15)
+  host2 (.10.32)                      host3 (.10.33)                  host4 (.10.34)
+  All in VLAN 10 / VNI 10010 / subnet 192.168.10.0/24
+
+
+Playbook commands (run from project root)
+------------------------------------------
+# 1. Deploy
+ansible-playbook playbooks/scenario1_flood_and_learn.yml
+
+# 2. Validate (EOS state + host pings)
+ansible-playbook playbooks/validate_scenario1.yml
+
+# 3. Cleanup (removes Vxlan1, restores leaf5 Ethernet3 to VLAN20)
+ansible-playbook playbooks/scenario1_flood_and_learn.yml --tags cleanup
+
+# Re-run validate_underlay to confirm base underlay is still intact
+ansible-playbook playbooks/validate_underlay.yml
+
+
+What each play configures
+--------------------------
+EOS (leaf3, leaf4, leaf5):
+  - VLAN 10  name TENANT_A_WEB
+  - Ethernet3  switchport access vlan 10
+  - interface Vxlan1
+      vxlan source-interface Loopback0
+      vxlan udp-port 4789
+      vxlan vlan 10 vni 10010
+      vxlan vlan 10 flood vtep <peer1> <peer2>   <- static HER list
+
+Linux hosts (host2, host3, host4):
+  - ip addr add 192.168.10.{32,33,34}/24 dev eth1
+  - ip link set eth1 up
+  Note: host4 is temporarily in VLAN10 for this scenario (final home is VLAN20/TENANT_B)
+
+
+Manual verification on the EOS nodes
+--------------------------------------
+SSH: ssh admin@<mgmt-ip>   password: <vaulted>
+
+  show vxlan vni                  # VLAN10 -> VNI 10010
+  show vxlan flood vtep           # static flood list (two remote VTEPs)
+  show interfaces Vxlan1          # line protocol up
+  show mac address-table          # MACs learned after first ping
+  show vxlan address-table        # MAC-to-VTEP mapping (data-plane learned)
+
+Flood-and-learn experiment (observe unknown unicast flooding):
+  On leaf3:
+    clear mac address-table dynamic
+  On host2:
+    ping -c1 192.168.10.33          # triggers ARP broadcast -> VXLAN flood
+  On leaf3:
+    show mac address-table          # host2 and host3 MACs now present
+    show vxlan address-table        # host3 MAC learned via 10.0.0.14
+
+
+Manual verification on the Linux hosts
+----------------------------------------
+SSH: ssh deployer@<mgmt-ip>   password: <vaulted>
+
+  ip addr show eth1               # 192.168.10.x/24 present
+  ping -c4 192.168.10.33          # host2 -> host3 (leaf3 -> leaf4 via VXLAN)
+  ping -c4 192.168.10.34          # host2 -> host4 (leaf3 -> leaf5 via VXLAN)
+  ip neigh show                   # ARP cache (MAC learned from data plane)
+
+  Host    Mgmt IP        Data IP
+  ------  -------------  --------------------
+  host2   172.60.60.32   192.168.10.32/24
+  host3   172.60.60.33   192.168.10.33/24
+  host4   172.60.60.34   192.168.10.34/24 (scenario 1 only)
