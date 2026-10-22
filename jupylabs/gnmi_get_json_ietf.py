@@ -86,54 +86,94 @@ def step1() -> None:
 # ---------------------------------------------------------------------------
 # Step 2 — All interfaces: json vs json_ietf
 # ---------------------------------------------------------------------------
-def step2() -> None:
+def unwrap_interfaces(val: dict) -> list:
+    """
+    EOS may nest the interface list under several key variants.
+    Try each in order and return the first non-empty list found.
+    """
+    candidates = [
+        # json_ietf — double-wrapped: interfaces container then interface list
+        val.get("openconfig-interfaces:interfaces", {})
+           .get("openconfig-interfaces:interface"),
+        val.get("openconfig-interfaces:interfaces", {})
+           .get("interface"),
+        # json — same structure, no module prefix
+        val.get("interfaces", {}).get("interface"),
+        # pygnmi sometimes strips the outer container
+        val.get("openconfig-interfaces:interface"),
+        val.get("interface"),
+    ]
+    for c in candidates:
+        if c:
+            return c
+    return []
+
+
+def get_field(d: dict, *keys: str, default="n/a"):
+    """Try multiple key names and return the first match."""
+    for k in keys:
+        if k in d:
+            return d[k]
+    return default
+
+
+def step2(debug: bool = False) -> None:
     section("STEP 2 — All interfaces: json vs json_ietf comparison")
 
     path = "/interfaces"
 
     with open_client() as gc:
-        resp_json = gc.get(
-            path=[path],
-            datatype="state",
-            encoding="json",
-        )
-        resp_ietf = gc.get(
-            path=[path],
-            datatype="state",
-            encoding="json_ietf",
-        )
+        resp_json = gc.get(path=[path], datatype="state", encoding="json")
+        resp_ietf = gc.get(path=[path], datatype="state", encoding="json_ietf")
 
     def extract_val(resp: dict) -> dict:
-        return resp.get("notification", [{}])[0].get("update", [{}])[0].get("val", {})
+        return (
+            resp.get("notification", [{}])[0]
+                .get("update", [{}])[0]
+                .get("val", {})
+        )
 
     val_json = extract_val(resp_json)
     val_ietf = extract_val(resp_ietf)
 
-    # Pull interface type field from first interface to show the key difference
-    interfaces_json = val_json.get("interface", [])
-    interfaces_ietf = val_ietf.get("openconfig-interfaces:interface",
-                      val_ietf.get("interface", []))
+    if debug:
+        print("\n[DEBUG] Top-level keys in json response:")
+        print("  ", list(val_json.keys()))
+        print("[DEBUG] Top-level keys in json_ietf response:")
+        print("  ", list(val_ietf.keys()))
+        # Show one level deeper
+        for k, v in val_ietf.items():
+            if isinstance(v, dict):
+                print(f"[DEBUG]   {k} -> {list(v.keys())}")
+        return
+
+    interfaces_json = unwrap_interfaces(val_json)
+    interfaces_ietf = unwrap_interfaces(val_ietf)
+
+    if not interfaces_json and not interfaces_ietf:
+        print("\n[ERROR] Could not find interface list in response.")
+        print("  Re-run with --debug to inspect the raw response structure:")
+        print("  python gnmi_get_json_ietf.py --step 2 --debug")
+        return
 
     print("\n--- Key difference: identityref encoding ---\n")
-    print(f"  {'Interface':<14} {'json (no prefix)':<35} {'json_ietf (module-prefixed)'}")
+    print(f"  {'Interface':<14} {'json (no prefix)':<35} json_ietf (module-prefixed)")
     print(f"  {'-'*14} {'-'*35} {'-'*35}")
 
-    # Build lookup for ietf by name
-    ietf_by_name = {}
+    # Build name -> type lookup from json_ietf list
+    ietf_by_name: dict[str, str] = {}
     for intf in interfaces_ietf:
-        name = intf.get("name") or intf.get("openconfig-interfaces:name", "")
-        state = intf.get("state") or intf.get("openconfig-interfaces:state", {})
-        ietf_by_name[name] = state.get(
-            "openconfig-interfaces:type",
-            state.get("type", "n/a")
-        )
+        name  = get_field(intf, "name", "openconfig-interfaces:name")
+        state = get_field(intf, "state", "openconfig-interfaces:state", default={})
+        itype = get_field(state, "openconfig-interfaces:type", "type")
+        ietf_by_name[name] = itype
 
     for intf in interfaces_json:
-        name  = intf.get("name", "")
-        state = intf.get("state", {})
-        t_json = state.get("type", "n/a")
+        name   = get_field(intf, "name", "openconfig-interfaces:name")
+        state  = get_field(intf, "state", "openconfig-interfaces:state", default={})
+        t_json = get_field(state, "type", "openconfig-interfaces:type")
         t_ietf = ietf_by_name.get(name, "n/a")
-        print(f"  {name:<14} {t_json:<35} {t_ietf}")
+        print(f"  {name:<14} {str(t_json):<35} {t_ietf}")
 
     print("\n--- What to observe ---")
     print("  json      : 'ethernetCsmacd'               — short form, no namespace")
@@ -267,11 +307,18 @@ def main() -> None:
         action="store_true",
         help="Run all four steps in sequence",
     )
+    parser.add_argument(
+        "--debug",
+        action="store_true",
+        help="Step 2 only: print raw top-level response keys instead of the table",
+    )
     args = parser.parse_args()
 
     if args.all:
         for fn in STEPS.values():
             fn()
+    elif args.step == "2":
+        step2(debug=args.debug)
     else:
         STEPS[args.step]()
 
