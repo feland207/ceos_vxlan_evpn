@@ -1,0 +1,7 @@
+---
+- import_tasks: check_isis.yml
+
+- import_tasks: check_bgp_evpn.yml
+  when: has_evpn_base | default(false) | bool
+
+- import_tasks: check_reachability.yml

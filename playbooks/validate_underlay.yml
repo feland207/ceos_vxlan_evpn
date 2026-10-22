@@ -1,0 +1,11 @@
+---
+- name: Validate IS-IS underlay and BGP EVPN base
+  hosts: ceos
+  connection: ansible.netcommon.network_cli
+  gather_facts: no
+
+  vars_files:
+    - ../secrets.yml
+
+  roles:
+    - validate_underlay

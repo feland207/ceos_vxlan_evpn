@@ -1,0 +1,5 @@
+node_role: leaf
+router_id: 10.0.0.11
+has_evpn_base: true
+expected_isis_neighbors: 2   # spine1, spine2
+expected_evpn_peers: 2       # spine1, spine2

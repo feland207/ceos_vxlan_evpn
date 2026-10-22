@@ -1,0 +1,4 @@
+node_role: leaf
+router_id: 10.0.0.15
+has_evpn_base: false
+expected_isis_neighbors: 2

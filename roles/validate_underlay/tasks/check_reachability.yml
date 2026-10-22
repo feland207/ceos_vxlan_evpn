@@ -1,0 +1,18 @@
+---
+- name: Ping all fabric loopbacks from Loopback0 (excluding self)
+  arista.eos.eos_command:
+    commands: "ping {{ item }} source loopback 0 repeat 3"
+  loop: "{{ fabric_loopbacks | reject('equalto', router_id) | list }}"
+  register: ping_results
+  loop_control:
+    label: "{{ inventory_hostname }} -> {{ item }}"
+
+- name: Assert all loopbacks reachable
+  ansible.builtin.assert:
+    that:
+      - "'0% packet loss' in item.stdout[0]"
+    fail_msg: "REACH FAIL: {{ inventory_hostname }} cannot reach {{ item.item }}"
+    success_msg: "REACH OK: {{ inventory_hostname }} -> {{ item.item }}"
+  loop: "{{ ping_results.results }}"
+  loop_control:
+    label: "{{ item.item }}"

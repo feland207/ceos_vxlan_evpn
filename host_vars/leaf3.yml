@@ -1,0 +1,4 @@
+node_role: leaf
+router_id: 10.0.0.13
+has_evpn_base: false   # no address-family evpn in base config; added by scenario playbooks
+expected_isis_neighbors: 2

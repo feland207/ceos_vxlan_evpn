@@ -1,0 +1,29 @@
+---
+- name: Gather BGP EVPN summary (JSON)
+  arista.eos.eos_command:
+    commands: "show bgp evpn summary | json"
+  register: bgp_raw
+
+- name: Parse BGP EVPN peers
+  ansible.builtin.set_fact:
+    bgp_evpn_established: >-
+      {{
+        bgp_raw.stdout[0].vrfs.default.peers
+        | dict2items
+        | selectattr('value.peerState', 'equalto', 'Established')
+        | list
+      }}
+    bgp_evpn_all: >-
+      {{ bgp_raw.stdout[0].vrfs.default.peers | dict2items }}
+
+- name: Assert BGP EVPN peers Established
+  ansible.builtin.assert:
+    that:
+      - bgp_evpn_established | length == expected_evpn_peers
+    fail_msg: >-
+      BGP EVPN FAIL on {{ inventory_hostname }}: expected {{ expected_evpn_peers }} Established,
+      got {{ bgp_evpn_established | length }}.
+      All peers: {{ bgp_evpn_all | map(attribute='key') | list | join(', ') }}
+    success_msg: >-
+      BGP EVPN OK — {{ inventory_hostname }}: {{ expected_evpn_peers }} peers Established
+      ({{ bgp_evpn_established | map(attribute='key') | list | join(', ') }})

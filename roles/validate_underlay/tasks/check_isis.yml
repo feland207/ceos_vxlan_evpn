@@ -1,0 +1,29 @@
+---
+- name: Gather IS-IS neighbors (JSON)
+  arista.eos.eos_command:
+    commands: "show isis neighbors | json"
+  register: isis_raw
+
+- name: Parse IS-IS adjacencies
+  ansible.builtin.set_fact:
+    isis_adjacencies: >-
+      {{
+        isis_raw.stdout[0].vrfs.default.isisInstances[isis_instance].neighbors
+        | dict2items
+        | map(attribute='value.adjacencies')
+        | flatten
+      }}
+
+- name: Assert IS-IS adjacency count and all UP
+  ansible.builtin.assert:
+    that:
+      - isis_adjacencies | length == expected_isis_neighbors
+      - isis_adjacencies | selectattr('state', 'equalto', 'up') | list | length == expected_isis_neighbors
+    fail_msg: >-
+      IS-IS FAIL on {{ inventory_hostname }}: expected {{ expected_isis_neighbors }} UP,
+      got {{ isis_adjacencies | length }} total /
+      {{ isis_adjacencies | selectattr('state', 'equalto', 'up') | list | length }} UP.
+      Neighbors: {{ isis_adjacencies | map(attribute='hostname') | list | join(', ') }}
+    success_msg: >-
+      IS-IS OK — {{ inventory_hostname }}: {{ expected_isis_neighbors }} adjacencies UP
+      ({{ isis_adjacencies | map(attribute='hostname') | list | join(', ') }})
