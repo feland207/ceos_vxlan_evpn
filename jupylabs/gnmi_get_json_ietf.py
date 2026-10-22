@@ -117,14 +117,40 @@ def get_field(d: dict, *keys: str, default="n/a"):
     return default
 
 
+def extract_name(intf: dict) -> str:
+    """
+    EOS returns the name as a prefixed key inside the list entry.
+    The key is 'openconfig-interfaces:name' regardless of encoding.
+    """
+    for k in ("openconfig-interfaces:name", "name"):
+        if k in intf:
+            return intf[k]
+    return "n/a"
+
+
+def extract_type(intf: dict) -> str:
+    """
+    Pull the interface type from the state container.
+    Both 'state' and 'openconfig-interfaces:state' are tried.
+    Returns the raw value — caller decides how to display it.
+    """
+    state = intf.get("openconfig-interfaces:state") or intf.get("state") or {}
+    for k in ("openconfig-interfaces:type", "type"):
+        if k in state:
+            return state[k]
+    return "n/a"
+
+
 def step2(debug: bool = False) -> None:
     section("STEP 2 — All interfaces: json vs json_ietf comparison")
 
-    path = "/interfaces"
+    # Target a single interface to keep the payload small and readable
+    # Use Ethernet1 — confirmed connected from 'show interfaces status'
+    path_single = "/interfaces/interface[name=Ethernet1]/state"
 
     with open_client() as gc:
-        resp_json = gc.get(path=[path], datatype="state", encoding="json")
-        resp_ietf = gc.get(path=[path], datatype="state", encoding="json_ietf")
+        resp_json = gc.get(path=[path_single], datatype="state", encoding="json")
+        resp_ietf = gc.get(path=[path_single], datatype="state", encoding="json_ietf")
 
     def extract_val(resp: dict) -> dict:
         return (
@@ -137,48 +163,55 @@ def step2(debug: bool = False) -> None:
     val_ietf = extract_val(resp_ietf)
 
     if debug:
-        print("\n[DEBUG] Top-level keys in json response:")
+        print("\n[DEBUG] json response keys:")
         print("  ", list(val_json.keys()))
-        print("[DEBUG] Top-level keys in json_ietf response:")
+        print("\n[DEBUG] json_ietf response keys:")
         print("  ", list(val_ietf.keys()))
-        # Show one level deeper
-        for k, v in val_ietf.items():
-            if isinstance(v, dict):
-                print(f"[DEBUG]   {k} -> {list(v.keys())}")
+        print("\n[DEBUG] json full value:")
+        print(pretty(val_json))
+        print("\n[DEBUG] json_ietf full value:")
+        print(pretty(val_ietf))
         return
 
-    interfaces_json = unwrap_interfaces(val_json)
-    interfaces_ietf = unwrap_interfaces(val_ietf)
+    # -----------------------------------------------------------------------
+    # The identityref difference lives in the 'type' leaf.
+    # EOS encodes it differently per encoding:
+    #   json      -> bare short-form:   "ethernetCsmacd"
+    #   json_ietf -> module-prefixed:   "iana-if-type:ethernetCsmacd"
+    # We pull every leaf that exists in both and show them side by side.
+    # -----------------------------------------------------------------------
 
-    if not interfaces_json and not interfaces_ietf:
-        print("\n[ERROR] Could not find interface list in response.")
-        print("  Re-run with --debug to inspect the raw response structure:")
-        print("  python gnmi_get_json_ietf.py --step 2 --debug")
-        return
+    # Collect all leaf keys present in either response (skip nested dicts/lists)
+    all_keys = sorted(
+        set(
+            k.replace("openconfig-interfaces:", "") for k in list(val_json.keys()) + list(val_ietf.keys())
+            if not isinstance(val_json.get(k) or val_ietf.get(k), (dict, list))
+        )
+    )
 
-    print("\n--- Key difference: identityref encoding ---\n")
-    print(f"  {'Interface':<14} {'json (no prefix)':<35} json_ietf (module-prefixed)")
-    print(f"  {'-'*14} {'-'*35} {'-'*35}")
+    def lookup(val: dict, bare_key: str) -> str:
+        """Try prefixed then bare key, return string representation."""
+        for k in (f"openconfig-interfaces:{bare_key}", bare_key):
+            if k in val:
+                return str(val[k])
+        return "—"
 
-    # Build name -> type lookup from json_ietf list
-    ietf_by_name: dict[str, str] = {}
-    for intf in interfaces_ietf:
-        name  = get_field(intf, "name", "openconfig-interfaces:name")
-        state = get_field(intf, "state", "openconfig-interfaces:state", default={})
-        itype = get_field(state, "openconfig-interfaces:type", "type")
-        ietf_by_name[name] = itype
+    print(f"\n  {'Leaf':<30} {'json':<40} {'json_ietf'}")
+    print(f"  {'-'*30} {'-'*40} {'-'*35}")
 
-    for intf in interfaces_json:
-        name   = get_field(intf, "name", "openconfig-interfaces:name")
-        state  = get_field(intf, "state", "openconfig-interfaces:state", default={})
-        t_json = get_field(state, "type", "openconfig-interfaces:type")
-        t_ietf = ietf_by_name.get(name, "n/a")
-        print(f"  {name:<14} {str(t_json):<35} {t_ietf}")
+    for key in all_keys:
+        v_json = lookup(val_json, key)
+        v_ietf = lookup(val_ietf, key)
+        # Highlight rows where the two encodings differ
+        marker = " ◀" if v_json != v_ietf else ""
+        print(f"  {key:<30} {v_json:<40} {v_ietf}{marker}")
 
     print("\n--- What to observe ---")
-    print("  json      : 'ethernetCsmacd'               — short form, no namespace")
-    print("  json_ietf : 'iana-if-type:ethernetCsmacd'  — module prefix makes the type unambiguous")
-    print("  This prefix is what allows parsers to validate values against the YANG schema.")
+    print("  Rows marked ◀ are where json and json_ietf differ.")
+    print("  'type' leaf  : json='ethernetCsmacd'  vs  json_ietf='iana-if-type:ethernetCsmacd'")
+    print("  admin-status : json='UP'               vs  json_ietf='UP'  (enum, same here)")
+    print("  Counters and integers are identical in both encodings.")
+    print("  The module prefix on identityref leaves is what makes json_ietf portable.")
 
 
 # ---------------------------------------------------------------------------
