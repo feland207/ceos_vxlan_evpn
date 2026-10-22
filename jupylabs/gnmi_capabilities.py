@@ -59,7 +59,7 @@ def get_capabilities(host: str, name: str = "") -> dict | None:
             caps = gc.capabilities()
 
         # --- gNMI version ---
-        gnmi_ver = caps.get("gNMI_version", "n/a")
+        gnmi_ver = caps.get("gnmi_version", "n/a")
         print(f"\n  gNMI version     : {gnmi_ver}")
 
         # --- Supported encodings ---
