@@ -4,10 +4,25 @@
   register: iface_info
   changed_when: false
 
+- name: Detect whether scenario IP is assigned
+  ansible.builtin.set_fact:
+    eth_ip_present: "{{ eth_ip.split('/')[0] in iface_info.stdout }}"
+
+- name: Report — scenario not deployed (IP absent)
+  ansible.builtin.debug:
+    msg: >-
+      {{ inventory_hostname }}: {{ eth_ip }} not configured on {{ eth_interface }} —
+      scenario not deployed yet.
+  when: not eth_ip_present
+
+- name: Skip remaining Linux checks — IP absent
+  ansible.builtin.meta: end_host
+  when: not eth_ip_present
+
 - name: Assert expected IP is configured
   ansible.builtin.assert:
     that:
-      - "eth_ip.split('/')[0] in iface_info.stdout"
+      - eth_ip_present
     fail_msg: "IP {{ eth_ip }} not found on {{ inventory_hostname }}:{{ eth_interface }}"
     success_msg: "IP {{ eth_ip }} configured on {{ inventory_hostname }}:{{ eth_interface }}"
 

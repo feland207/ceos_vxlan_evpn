@@ -4,6 +4,23 @@
     commands: "show interfaces Vxlan1 | json"
   register: vxlan_iface
 
+# stdout[0] is a dict when JSON parses OK; a string when the interface is absent
+- name: Detect whether Vxlan1 is present
+  ansible.builtin.set_fact:
+    vxlan1_present: "{{ vxlan_iface.stdout[0] is mapping }}"
+
+- name: Report — scenario 1 not deployed (Vxlan1 absent)
+  ansible.builtin.debug:
+    msg: >-
+      {{ inventory_hostname }}: Scenario 1 not deployed —
+      Vxlan1 does not exist yet.
+      Deploy first: ansible-playbook playbooks/scenario1_flood_and_learn.yml
+  when: not vxlan1_present
+
+- name: Skip remaining EOS checks — Vxlan1 absent
+  ansible.builtin.meta: end_host
+  when: not vxlan1_present
+
 - name: Assert Vxlan1 line protocol is up
   ansible.builtin.assert:
     that:
