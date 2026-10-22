@@ -6,6 +6,9 @@
 
   vars_files:
     - ../secrets.yml
+  vars:
+    ansible_user: "{{ eos_ansible_user }}"
+    ansible_password: "{{ eos_ansible_password }}"
 
   roles:
     - validate_underlay

@@ -5,12 +5,20 @@
   gather_facts: no
   vars_files:
     - ../secrets.yml
+  vars:
+    ansible_user: "{{ eos_ansible_user }}"
+    ansible_password: "{{ eos_ansible_password }}"
   roles:
     - validate_scenario1
 
 - name: "Validate Scenario 1 — Flood-and-Learn | Linux: host2"
   hosts: host2
   gather_facts: no
+  vars_files:
+    - ../secrets.yml
+  vars:
+    ansible_user: "{{ linux_ansible_user }}"
+    ansible_password: "{{ linux_ansible_password }}"
   roles:
     - role: validate_linux_connectivity
       vars:
@@ -21,6 +29,11 @@
 - name: "Validate Scenario 1 — Flood-and-Learn | Linux: host3"
   hosts: host3
   gather_facts: no
+  vars_files:
+    - ../secrets.yml
+  vars:
+    ansible_user: "{{ linux_ansible_user }}"
+    ansible_password: "{{ linux_ansible_password }}"
   roles:
     - role: validate_linux_connectivity
       vars:
@@ -31,7 +44,11 @@
 - name: "Validate Scenario 1 — Flood-and-Learn | Linux: host4"
   hosts: host4
   gather_facts: no
+  vars_files:
+    - ../secrets.yml
   vars:
+    ansible_user: "{{ linux_ansible_user }}"
+    ansible_password: "{{ linux_ansible_password }}"
     eth_ip: "192.168.10.34/24"
   roles:
     - role: validate_linux_connectivity
