@@ -1,0 +1,113 @@
+EVPN-VXLAN Lab — Ansible Playbook Usage
+========================================
+
+Prerequisites
+-------------
+- clab running: sudo clab deploy -t clab_files/ceos_clos.yml
+- Python venv active: source ~/automation/bin/activate
+- All commands run from the project root: ~/labs/ceos_vxlan_evpn/
+
+Credentials
+-----------
+Stored in secrets.yml (Ansible Vault, auto-unlocked via .vault_pass):
+  - EOS nodes : admin / <vaulted>
+  - Linux hosts: deployer / <vaulted>
+
+
+VALIDATE BASE UNDERLAY (IS-IS + BGP EVPN)
+------------------------------------------
+Checks on every ceos node:
+  1. IS-IS adjacencies — count and UP state
+  2. BGP EVPN sessions — Established (spines + leaf1/2 only; leaf3/4/5 skip
+     until a scenario playbook activates their EVPN address-family)
+  3. Loopback reachability — pings all 7 fabric loopbacks from Loopback0
+
+Run full validation (all 7 nodes):
+  ansible-playbook playbooks/validate_underlay.yml
+
+Run on a single node:
+  ansible-playbook playbooks/validate_underlay.yml --limit spine1
+  ansible-playbook playbooks/validate_underlay.yml --limit leaf1,leaf2
+
+Verbose output (show assert messages inline):
+  ansible-playbook playbooks/validate_underlay.yml -v
+
+Expected PLAY RECAP (clean lab):
+  spine1  ok=8  failed=0  skipped=0
+  spine2  ok=8  failed=0  skipped=0
+  leaf1   ok=8  failed=0  skipped=0
+  leaf2   ok=8  failed=0  skipped=0
+  leaf3   ok=5  failed=0  skipped=3   <- BGP EVPN skipped (no EVPN AF in base)
+  leaf4   ok=5  failed=0  skipped=3
+  leaf5   ok=5  failed=0  skipped=3
+
+
+MANUAL VERIFICATION COMMANDS (SSH to each node)
+------------------------------------------------
+SSH: ssh admin@<mgmt-ip>   password: <vaulted>
+
+  Node    Mgmt IP
+  ------  -------------
+  spine1  172.60.60.21
+  spine2  172.60.60.22
+  leaf1   172.60.60.11
+  leaf2   172.60.60.12
+  leaf3   172.60.60.13
+  leaf4   172.60.60.14
+  leaf5   172.60.60.15
+
+IS-IS underlay:
+  show isis neighbors
+  show isis database
+  show isis interface brief
+  show ip route isis
+
+BGP EVPN overlay:
+  show bgp evpn summary
+  show bgp evpn route-type imet
+  show bgp evpn route-type mac-ip
+  show bgp evpn route-type ip-prefix ipv4
+  show bgp evpn route-type auto-discovery
+  show bgp evpn route-type ethernet-segment
+
+Loopback reachability (run from any node):
+  ping 10.0.0.21 source Loopback0
+  ping 10.0.0.22 source Loopback0
+  ping 10.0.0.11 source Loopback0
+  ping 10.0.0.12 source Loopback0
+  ping 10.0.0.13 source Loopback0
+  ping 10.0.0.14 source Loopback0
+  ping 10.0.0.15 source Loopback0
+
+VXLAN data plane (after scenario playbooks):
+  show vxlan vni
+  show vxlan vtep
+  show vxlan address-table
+  show mac address-table
+  show interfaces vxlan1
+
+ESI / multihoming (leaf1, leaf2):
+  show port-channel
+  show lacp peer
+  show bgp evpn route-type ethernet-segment detail
+
+
+LINUX HOST MANUAL VERIFICATION
+--------------------------------
+SSH: ssh deployer@<mgmt-ip>   password: <vaulted>
+
+  Host   Mgmt IP        Data iface  Tenant IP
+  -----  -------------  ----------  -----------------
+  host1  172.60.60.31   bond0       192.168.10.31/24
+  host2  172.60.60.32   eth1        192.168.10.32/24
+  host3  172.60.60.33   eth1        192.168.10.33/24
+  host4  172.60.60.34   eth1        192.168.20.34/24
+
+Useful commands inside each host:
+  ip addr show
+  ip route show
+  ip neigh show
+  ping -c4 <destination-ip>
+
+  # host1 only — verify LACP bond:
+  cat /proc/net/bonding/bond0
