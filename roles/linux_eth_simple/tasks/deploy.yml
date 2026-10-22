@@ -1,0 +1,19 @@
+---
+- name: Set timezone to Europe/Warsaw
+  ansible.builtin.file:
+    src: /usr/share/zoneinfo/Europe/Warsaw
+    dest: /etc/localtime
+    state: link
+    force: yes
+
+- name: Assign IP {{ eth_ip }} to {{ eth_interface }}
+  ansible.builtin.command: "ip addr add {{ eth_ip }} dev {{ eth_interface }}"
+  register: ip_add
+  failed_when:
+    - ip_add.rc != 0
+    - "'File exists' not in ip_add.stderr"
+  changed_when: ip_add.rc == 0
+
+- name: Bring {{ eth_interface }} up
+  ansible.builtin.command: "ip link set {{ eth_interface }} up"
+  changed_when: false

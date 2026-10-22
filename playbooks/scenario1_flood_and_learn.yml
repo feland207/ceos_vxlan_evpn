@@ -1,0 +1,26 @@
+---
+# Deploy:  ansible-playbook playbooks/scenario1_flood_and_learn.yml
+# Cleanup: ansible-playbook playbooks/scenario1_flood_and_learn.yml --tags cleanup
+
+- name: "Scenario 1 — Flood-and-Learn | EOS: leaf3/4/5"
+  hosts: leaf3,leaf4,leaf5
+  connection: ansible.netcommon.network_cli
+  gather_facts: no
+  vars_files:
+    - ../secrets.yml
+  roles:
+    - eos_vxlan_flood
+
+- name: "Scenario 1 — Flood-and-Learn | Linux: host2/3"
+  hosts: host2,host3
+  gather_facts: no
+  roles:
+    - linux_eth_simple
+
+- name: "Scenario 1 — Flood-and-Learn | Linux: host4 (VLAN10, temporary override)"
+  hosts: host4
+  gather_facts: no
+  vars:
+    eth_ip: "192.168.10.34/24"
+  roles:
+    - linux_eth_simple

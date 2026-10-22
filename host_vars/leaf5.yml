@@ -2,3 +2,10 @@ node_role: leaf
 router_id: 10.0.0.15
 has_evpn_base: false
 expected_isis_neighbors: 2
+# Scenario 1 — static HER flood peers
+flood_vtep_peers:
+  - 10.0.0.13
+  - 10.0.0.14
+# Cleanup hints
+base_access_vlan: 20        # Ethernet3 is access vlan 20 in base (VLAN20/TENANT_B)
+scenario1_adds_vlan10: true  # VLAN10 is NOT in leaf5 base config; added by scenario 1

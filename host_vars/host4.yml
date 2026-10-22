@@ -1,0 +1,4 @@
+# Final state: VLAN20 / TENANT_B (scenario 2+)
+# Scenario 1 overrides eth_ip at play level to 192.168.10.34/24
+eth_interface: eth1
+eth_ip: 192.168.20.34/24

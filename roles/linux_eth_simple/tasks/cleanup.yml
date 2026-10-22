@@ -1,0 +1,8 @@
+---
+- name: Remove IP {{ eth_ip }} from {{ eth_interface }}
+  ansible.builtin.command: "ip addr del {{ eth_ip }} dev {{ eth_interface }}"
+  register: ip_del
+  failed_when:
+    - ip_del.rc != 0
+    - "'Cannot assign requested address' not in ip_del.stderr"
+  changed_when: ip_del.rc == 0

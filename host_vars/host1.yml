@@ -1,0 +1,2 @@
+eth_interface: bond0
+eth_ip: 192.168.10.31/24

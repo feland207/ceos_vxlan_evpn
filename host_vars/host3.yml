@@ -1,0 +1,2 @@
+eth_interface: eth1
+eth_ip: 192.168.10.33/24

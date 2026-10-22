@@ -1,0 +1,4 @@
+vxlan_vlan: 10
+vxlan_vni: 10010
+vxlan_vlan_name: TENANT_A_WEB
+host_access_port: Ethernet3

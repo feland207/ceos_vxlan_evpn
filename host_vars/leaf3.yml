@@ -1,4 +1,11 @@
 node_role: leaf
 router_id: 10.0.0.13
-has_evpn_base: false   # no address-family evpn in base config; added by scenario playbooks
+has_evpn_base: false
 expected_isis_neighbors: 2
+# Scenario 1 — static HER flood peers
+flood_vtep_peers:
+  - 10.0.0.14
+  - 10.0.0.15
+# Cleanup hints
+base_access_vlan: 10        # Ethernet3 already access vlan 10 in base
+scenario1_adds_vlan10: false # VLAN10 already exists in base config

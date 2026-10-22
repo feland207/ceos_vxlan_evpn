@@ -1,0 +1,41 @@
+---
+- name: "Validate Scenario 1 — Flood-and-Learn | EOS: leaf3/4/5"
+  hosts: leaf3,leaf4,leaf5
+  connection: ansible.netcommon.network_cli
+  gather_facts: no
+  vars_files:
+    - ../secrets.yml
+  roles:
+    - validate_scenario1
+
+- name: "Validate Scenario 1 — Flood-and-Learn | Linux: host2"
+  hosts: host2
+  gather_facts: no
+  roles:
+    - role: validate_linux_connectivity
+      vars:
+        ping_targets:
+          - 192.168.10.33
+          - 192.168.10.34
+
+- name: "Validate Scenario 1 — Flood-and-Learn | Linux: host3"
+  hosts: host3
+  gather_facts: no
+  roles:
+    - role: validate_linux_connectivity
+      vars:
+        ping_targets:
+          - 192.168.10.32
+          - 192.168.10.34
+
+- name: "Validate Scenario 1 — Flood-and-Learn | Linux: host4"
+  hosts: host4
+  gather_facts: no
+  vars:
+    eth_ip: "192.168.10.34/24"
+  roles:
+    - role: validate_linux_connectivity
+      vars:
+        ping_targets:
+          - 192.168.10.32
+          - 192.168.10.33

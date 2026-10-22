@@ -1,0 +1,31 @@
+---
+- name: Check IP {{ eth_ip }} is configured on {{ eth_interface }}
+  ansible.builtin.command: "ip addr show dev {{ eth_interface }}"
+  register: iface_info
+  changed_when: false
+
+- name: Assert expected IP is configured
+  ansible.builtin.assert:
+    that:
+      - "eth_ip.split('/')[0] in iface_info.stdout"
+    fail_msg: "IP {{ eth_ip }} not found on {{ inventory_hostname }}:{{ eth_interface }}"
+    success_msg: "IP {{ eth_ip }} configured on {{ inventory_hostname }}:{{ eth_interface }}"
+
+- name: Ping connectivity targets from {{ inventory_hostname }}
+  ansible.builtin.command: "ping -c 3 -W 2 {{ item }}"
+  loop: "{{ ping_targets }}"
+  register: ping_results
+  changed_when: false
+  failed_when: false
+  when: ping_targets | length > 0
+
+- name: Assert all pings succeed
+  ansible.builtin.assert:
+    that:
+      - item.rc == 0
+    fail_msg: "PING FAIL: {{ inventory_hostname }} → {{ item.item }}"
+    success_msg: "PING OK: {{ inventory_hostname }} → {{ item.item }}"
+  loop: "{{ ping_results.results | default([]) }}"
+  loop_control:
+    label: "{{ item.item }}"
+  when: ping_targets | length > 0

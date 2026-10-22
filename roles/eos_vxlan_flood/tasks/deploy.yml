@@ -1,0 +1,26 @@
+---
+- name: Configure VLAN {{ vxlan_vlan }} ({{ vxlan_vlan_name }})
+  arista.eos.eos_vlans:
+    config:
+      - vlan_id: "{{ vxlan_vlan }}"
+        name: "{{ vxlan_vlan_name }}"
+    state: merged
+
+- name: Configure {{ host_access_port }} — access VLAN {{ vxlan_vlan }}
+  arista.eos.eos_l2_interfaces:
+    config:
+      - name: "{{ host_access_port }}"
+        mode: access
+        access:
+          vlan: "{{ vxlan_vlan }}"
+    state: merged
+
+- name: Configure Vxlan1 — source Loopback0, VNI {{ vxlan_vni }}, static flood list
+  arista.eos.eos_config:
+    parents: "interface Vxlan1"
+    lines:
+      - "vxlan source-interface Loopback0"
+      - "vxlan udp-port 4789"
+      - "vxlan vlan {{ vxlan_vlan }} vni {{ vxlan_vni }}"
+      - "vxlan vlan {{ vxlan_vlan }} flood vtep {{ flood_vtep_peers | join(' ') }}"
+    replace: block

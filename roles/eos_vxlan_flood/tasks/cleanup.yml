@@ -1,0 +1,21 @@
+---
+- name: Remove Vxlan1 interface
+  arista.eos.eos_config:
+    lines:
+      - "no interface Vxlan1"
+
+- name: Restore {{ host_access_port }} to base VLAN {{ base_access_vlan | default(vxlan_vlan) }}
+  arista.eos.eos_l2_interfaces:
+    config:
+      - name: "{{ host_access_port }}"
+        mode: access
+        access:
+          vlan: "{{ base_access_vlan }}"
+    state: merged
+  when: (base_access_vlan | default(vxlan_vlan) | int) != (vxlan_vlan | int)
+
+- name: Remove VLAN {{ vxlan_vlan }} (only on nodes where scenario 1 added it)
+  arista.eos.eos_config:
+    lines:
+      - "no vlan {{ vxlan_vlan }}"
+  when: scenario1_adds_vlan10 | default(false) | bool
