@@ -4,7 +4,7 @@ RESTCONF API Root Discovery
 ===========================
 Topology : ceos-fabric (Containerlab)
 Target   : any Arista cEOS node (default: leaf3)
-Port     : 443 (HTTPS, management api http-commands)
+Port     : 6020 (HTTPS, management api restconf)
 Auth     : admin / admin
 
 Steps
@@ -35,7 +35,7 @@ NODES = {
     "leaf5":  "172.60.60.15",
 }
 
-PORT     = 443
+PORT     = 6020
 USERNAME = "admin"
 PASSWORD = "admin"
 
@@ -141,6 +141,8 @@ def _print_modules(mods: list) -> None:
 # Main
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    host = sys.argv[1] if len(sys.argv) > 1 else NODES["leaf3"]
+    # Filter out Jupyter kernel args (--f=<kernel.json>, -f ..., etc.)
+    real_args = [a for a in sys.argv[1:] if not a.startswith("-")]
+    host = real_args[0] if real_args else NODES["leaf3"]
     name = next((n for n, ip in NODES.items() if ip == host), host)
     discover(host, name)
