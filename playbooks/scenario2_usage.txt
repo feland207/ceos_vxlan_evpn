@@ -7,6 +7,9 @@ Deploy:
 Cleanup:
   ansible-playbook playbooks/scenario2_evpn_overlay.yml --tags cleanup --vault-password-file .vault_pass
 
+Validate:
+  ansible-playbook playbooks/validate_scenario2.yml --vault-password-file .vault_pass
+
 Topology:
   leaf3 — VLAN10 L2VNI 10010 — host2 (192.168.10.32/24, eth1)
   leaf4 — VLAN10 L2VNI 10010 — host3 (192.168.10.33/24, eth1)
@@ -15,10 +18,19 @@ Topology:
 
 Spines are pre-configured as BGP EVPN route-reflectors — no spine changes needed.
 
-Connectivity tests:
+Validation checks (EOS per leaf):
+  - Vxlan1 line protocol up
+  - BGP EVPN sessions Estab to both spines (10.0.0.21, 10.0.0.22)
+  - L2VNI mappings present in VNI table
+  - L3VNI mapping present (leaf5 only)
+  - EVPN MAC-IP routes present (BGP learning active)
+
+Validation checks (Linux):
   host2 → host3:   ping 192.168.10.33   (L2VNI EVPN type-2 MAC/IP)
   host3 → host2:   ping 192.168.10.32
   host4 → GW:      ping 192.168.20.1    (L3VNI SVI on leaf5)
+
+Validate runs gracefully before deploy and after cleanup (no failures, informational messages).
 
 Notes:
   - host4 uses eth1.20 (VLAN subinterface) because leaf5 Eth3 is a trunk (base config)
