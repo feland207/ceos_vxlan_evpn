@@ -1,8 +1,17 @@
 ---
-- name: Remove IP {{ eth_ip }} from {{ eth_interface }}
-  ansible.builtin.command: "ip addr del {{ eth_ip }} dev {{ eth_interface }}"
+- name: Remove IP {{ eth_ip }} from {{ eth_interface }}{{ '.' ~ eth_vlan if eth_vlan is defined else '' }}
+  ansible.builtin.command: "ip addr del {{ eth_ip }} dev {{ eth_interface }}{{ '.' ~ eth_vlan if eth_vlan is defined else '' }}"
   register: ip_del
   failed_when:
     - ip_del.rc != 0
     - "'Cannot assign requested address' not in ip_del.stderr"
   changed_when: ip_del.rc == 0
+
+- name: Remove VLAN subinterface {{ eth_interface }}.{{ eth_vlan }}
+  ansible.builtin.command: "ip link delete {{ eth_interface }}.{{ eth_vlan }}"
+  register: vlan_del
+  failed_when:
+    - vlan_del.rc != 0
+    - "'Cannot find device' not in vlan_del.stderr"
+  changed_when: vlan_del.rc == 0
+  when: eth_vlan is defined

@@ -9,3 +9,12 @@ flood_vtep_peers:
 # Cleanup hints
 base_access_vlan: 20        # Ethernet3 is access vlan 20 in base (VLAN20/TENANT_B)
 scenario1_adds_vlan10: true  # VLAN10 is NOT in leaf5 base config; added by scenario 1
+# Scenario 2 — BGP EVPN overlay
+evpn_l2vnis:
+  - vlan: 20
+    vni: 10020
+evpn_l3vnis:
+  - vrf: TENANT_B
+    l3vni: 10200
+    svi_vlan: 20
+    svi_ip_virtual: 192.168.20.1/24

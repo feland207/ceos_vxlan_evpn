@@ -1,0 +1,66 @@
+---
+- name: Configure Vxlan1 source interface and UDP port
+  arista.eos.eos_config:
+    parents: "interface Vxlan1"
+    lines:
+      - "vxlan source-interface Loopback0"
+      - "vxlan udp-port 4789"
+
+- name: Configure Vxlan1 L2VNI — VLAN {{ item.vlan }} → VNI {{ item.vni }}
+  arista.eos.eos_config:
+    parents: "interface Vxlan1"
+    lines:
+      - "vxlan vlan {{ item.vlan }} vni {{ item.vni }}"
+  loop: "{{ evpn_l2vnis | default([]) }}"
+
+- name: Configure Vxlan1 L3VNI — VRF {{ item.vrf }} → VNI {{ item.l3vni }}
+  arista.eos.eos_config:
+    parents: "interface Vxlan1"
+    lines:
+      - "vxlan vrf {{ item.vrf }} vni {{ item.l3vni }}"
+  loop: "{{ evpn_l3vnis | default([]) }}"
+
+- name: Configure SVI Vlan{{ item.svi_vlan }} — VRF {{ item.vrf }} anycast GW {{ item.svi_ip_virtual }}
+  arista.eos.eos_config:
+    parents: "interface Vlan{{ item.svi_vlan }}"
+    lines:
+      - "vrf {{ item.vrf }}"
+      - "ip address virtual {{ item.svi_ip_virtual }}"
+  loop: "{{ evpn_l3vnis | default([]) }}"
+
+- name: Configure virtual-router MAC address
+  arista.eos.eos_config:
+    lines:
+      - "ip virtual-router mac-address {{ virtual_router_mac }}"
+  when: evpn_l3vnis | default([]) | length > 0
+
+- name: Activate BGP address-family evpn (SPINES peer group)
+  arista.eos.eos_config:
+    parents:
+      - "router bgp {{ bgp_asn }}"
+      - "address-family evpn"
+    lines:
+      - "neighbor SPINES activate"
+
+- name: Configure BGP EVPN for VLAN {{ item.vlan }} (VNI {{ item.vni }})
+  arista.eos.eos_config:
+    parents:
+      - "router bgp {{ bgp_asn }}"
+      - "vlan {{ item.vlan }}"
+    lines:
+      - "rd auto"
+      - "route-target both {{ bgp_asn }}:{{ item.vni }}"
+      - "redistribute learned"
+  loop: "{{ evpn_l2vnis | default([]) }}"
+
+- name: Configure BGP VRF {{ item.vrf }} for L3VNI {{ item.l3vni }}
+  arista.eos.eos_config:
+    parents:
+      - "router bgp {{ bgp_asn }}"
+      - "vrf {{ item.vrf }}"
+    lines:
+      - "rd {{ router_id }}:1"
+      - "route-target import evpn 65000:{{ item.l3vni }}"
+      - "route-target export evpn 65000:{{ item.l3vni }}"
+      - "redistribute connected"
+  loop: "{{ evpn_l3vnis | default([]) }}"

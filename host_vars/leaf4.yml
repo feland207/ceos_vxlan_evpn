@@ -9,3 +9,7 @@ flood_vtep_peers:
 # Cleanup hints
 base_access_vlan: 10
 scenario1_adds_vlan10: false
+# Scenario 2 — BGP EVPN overlay
+evpn_l2vnis:
+  - vlan: 10
+    vni: 10010

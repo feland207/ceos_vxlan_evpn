@@ -1,0 +1,26 @@
+Scenario 2 — BGP EVPN Overlay
+==============================
+
+Deploy:
+  ansible-playbook playbooks/scenario2_evpn_overlay.yml --vault-password-file .vault_pass
+
+Cleanup:
+  ansible-playbook playbooks/scenario2_evpn_overlay.yml --tags cleanup --vault-password-file .vault_pass
+
+Topology:
+  leaf3 — VLAN10 L2VNI 10010 — host2 (192.168.10.32/24, eth1)
+  leaf4 — VLAN10 L2VNI 10010 — host3 (192.168.10.33/24, eth1)
+  leaf5 — VLAN20 L2VNI 10020 + TENANT_B L3VNI 10200 — host4 (192.168.20.34/24, eth1.20)
+           SVI Vlan20 = 192.168.20.1/24 (anycast GW, virtual MAC 00:1c:73:00:00:01)
+
+Spines are pre-configured as BGP EVPN route-reflectors — no spine changes needed.
+
+Connectivity tests:
+  host2 → host3:   ping 192.168.10.33   (L2VNI EVPN type-2 MAC/IP)
+  host3 → host2:   ping 192.168.10.32
+  host4 → GW:      ping 192.168.20.1    (L3VNI SVI on leaf5)
+
+Notes:
+  - host4 uses eth1.20 (VLAN subinterface) because leaf5 Eth3 is a trunk (base config)
+  - route-target uses explicit BGP ASN:VNI format (e.g., 65000:10010) — 'auto' keyword
+    not valid under 'router bgp / vlan <id>' context in EOS 4.32

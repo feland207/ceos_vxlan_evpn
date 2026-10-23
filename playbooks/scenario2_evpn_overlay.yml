@@ -1,0 +1,38 @@
+---
+# Deploy:  ansible-playbook playbooks/scenario2_evpn_overlay.yml
+# Cleanup: ansible-playbook playbooks/scenario2_evpn_overlay.yml --tags cleanup
+
+- name: "Scenario 2 — BGP EVPN | EOS: leaf3/4/5"
+  hosts: leaf3,leaf4,leaf5
+  connection: ansible.netcommon.network_cli
+  gather_facts: no
+  vars_files:
+    - ../secrets.yml
+  vars:
+    ansible_user: "{{ eos_ansible_user }}"
+    ansible_password: "{{ eos_ansible_password }}"
+  roles:
+    - eos_vxlan_evpn
+
+- name: "Scenario 2 — BGP EVPN | Linux: host2/3 (VLAN10, 192.168.10.x/24)"
+  hosts: host2,host3
+  gather_facts: no
+  vars_files:
+    - ../secrets.yml
+  vars:
+    ansible_user: "{{ linux_ansible_user }}"
+    ansible_password: "{{ linux_ansible_password }}"
+  roles:
+    - linux_eth_simple
+
+- name: "Scenario 2 — BGP EVPN | Linux: host4 (VLAN20 trunk, 192.168.20.34/24)"
+  hosts: host4
+  gather_facts: no
+  vars_files:
+    - ../secrets.yml
+  vars:
+    ansible_user: "{{ linux_ansible_user }}"
+    ansible_password: "{{ linux_ansible_password }}"
+    eth_vlan: 20
+  roles:
+    - linux_eth_simple

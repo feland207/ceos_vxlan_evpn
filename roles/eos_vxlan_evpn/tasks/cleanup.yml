@@ -1,0 +1,37 @@
+---
+- name: Remove BGP VRF {{ item.vrf }} section
+  arista.eos.eos_config:
+    parents: "router bgp {{ bgp_asn }}"
+    lines:
+      - "no vrf {{ item.vrf }}"
+  loop: "{{ evpn_l3vnis | default([]) }}"
+
+- name: Remove BGP EVPN VLAN {{ item.vlan }} section
+  arista.eos.eos_config:
+    parents: "router bgp {{ bgp_asn }}"
+    lines:
+      - "no vlan {{ item.vlan }}"
+  loop: "{{ evpn_l2vnis | default([]) }}"
+
+- name: Remove BGP address-family evpn
+  arista.eos.eos_config:
+    parents: "router bgp {{ bgp_asn }}"
+    lines:
+      - "no address-family evpn"
+
+- name: Remove Vxlan1 interface
+  arista.eos.eos_config:
+    lines:
+      - "no interface Vxlan1"
+
+- name: Remove SVI Vlan{{ item.svi_vlan }}
+  arista.eos.eos_config:
+    lines:
+      - "no interface Vlan{{ item.svi_vlan }}"
+  loop: "{{ evpn_l3vnis | default([]) }}"
+
+- name: Remove virtual-router MAC address
+  arista.eos.eos_config:
+    lines:
+      - "no ip virtual-router mac-address"
+  when: evpn_l3vnis | default([]) | length > 0

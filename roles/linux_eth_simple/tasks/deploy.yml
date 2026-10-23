@@ -6,8 +6,17 @@
     state: link
     force: yes
 
-- name: Assign IP {{ eth_ip }} to {{ eth_interface }}
-  ansible.builtin.command: "ip addr add {{ eth_ip }} dev {{ eth_interface }}"
+- name: Create VLAN subinterface {{ eth_interface }}.{{ eth_vlan }}
+  ansible.builtin.command: "ip link add link {{ eth_interface }} name {{ eth_interface }}.{{ eth_vlan }} type vlan id {{ eth_vlan }}"
+  register: vlan_add
+  failed_when:
+    - vlan_add.rc != 0
+    - "'RTNETLINK answers: File exists' not in vlan_add.stderr"
+  changed_when: vlan_add.rc == 0
+  when: eth_vlan is defined
+
+- name: Assign IP {{ eth_ip }} to {{ eth_interface }}{{ '.' ~ eth_vlan if eth_vlan is defined else '' }}
+  ansible.builtin.command: "ip addr add {{ eth_ip }} dev {{ eth_interface }}{{ '.' ~ eth_vlan if eth_vlan is defined else '' }}"
   register: ip_add
   failed_when:
     - ip_add.rc != 0
@@ -15,6 +24,6 @@
     - "'Address already assigned' not in ip_add.stderr"
   changed_when: ip_add.rc == 0
 
-- name: Bring {{ eth_interface }} up
-  ansible.builtin.command: "ip link set {{ eth_interface }} up"
+- name: Bring {{ eth_interface }}{{ '.' ~ eth_vlan if eth_vlan is defined else '' }} up
+  ansible.builtin.command: "ip link set {{ eth_interface }}{{ '.' ~ eth_vlan if eth_vlan is defined else '' }} up"
   changed_when: false
