@@ -1,6 +1,6 @@
 ---
 - name: Collect backup config (Multi-Platform)
-  hosts: all
+  hosts: iosxr:iosxe:ceos
   connection: ansible.netcommon.network_cli
   gather_facts: no
 
@@ -45,15 +45,24 @@
       register: ceos_config_output
       when: ansible_network_os == 'arista.eos.eos'
 
-    - name: Unify config output
+    - name: Unify config output (XR)
       ansible.builtin.set_fact:
-        config_output: >-
-          {{ xr_config_output if ansible_network_os == 'cisco.iosxr.iosxr'
-          else (xe_config_output if ansible_network_os == 'cisco.ios.ios'
-          else ceos_config_output) }}
+        config_output: "{{ xr_config_output }}"
+      when: ansible_network_os == 'cisco.iosxr.iosxr'
+
+    - name: Unify config output (XE)
+      ansible.builtin.set_fact:
+        config_output: "{{ xe_config_output }}"
+      when: ansible_network_os == 'cisco.ios.ios'
+
+    - name: Unify config output (cEOS)
+      ansible.builtin.set_fact:
+        config_output: "{{ ceos_config_output }}"
+      when: ansible_network_os == 'arista.eos.eos'
 
     - name: Save config to file
       ansible.builtin.copy:
         content: "{{ config_output.stdout[0] }}"
         dest: "{{ backup_dir }}/{{ inventory_hostname }}.cfg"
       delegate_to: localhost
+      when: config_output is defined
