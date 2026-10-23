@@ -5,6 +5,8 @@
   failed_when:
     - ip_del.rc != 0
     - "'Cannot assign requested address' not in ip_del.stderr"
+    - "'Address not found' not in ip_del.stderr"
+    - "'Cannot find device' not in ip_del.stderr"
   changed_when: ip_del.rc == 0
 
 - name: Remove VLAN subinterface {{ eth_interface }}.{{ eth_vlan }}

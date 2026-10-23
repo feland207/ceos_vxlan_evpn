@@ -3,10 +3,11 @@
   ansible.builtin.command: "ip addr show dev {{ eth_interface }}"
   register: iface_info
   changed_when: false
+  failed_when: false
 
 - name: Detect whether scenario IP is assigned
   ansible.builtin.set_fact:
-    eth_ip_present: "{{ eth_ip.split('/')[0] in iface_info.stdout }}"
+    eth_ip_present: "{{ iface_info.rc == 0 and eth_ip.split('/')[0] in iface_info.stdout }}"
 
 - name: Report — scenario not deployed (IP absent)
   ansible.builtin.debug:

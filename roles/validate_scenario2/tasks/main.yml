@@ -1,0 +1,81 @@
+---
+# Graceful pre-deploy detection — avoids JSON pipe hang when Vxlan1 is absent
+- name: Check Vxlan1 in running-config
+  arista.eos.eos_command:
+    commands: "show running-config section interface Vxlan"
+  register: vxlan_runcfg
+
+- name: Detect whether Vxlan1 is configured
+  ansible.builtin.set_fact:
+    vxlan1_present: "{{ 'interface Vxlan1' in vxlan_runcfg.stdout[0] }}"
+
+- name: Report — scenario 2 not deployed (Vxlan1 absent)
+  ansible.builtin.debug:
+    msg: >-
+      {{ inventory_hostname }}: Scenario 2 not deployed —
+      Vxlan1 not found in running-config.
+      Deploy first: ansible-playbook playbooks/scenario2_evpn_overlay.yml
+  when: not vxlan1_present
+
+- name: Skip remaining EOS checks — Vxlan1 absent
+  ansible.builtin.meta: end_host
+  when: not vxlan1_present
+
+- name: Gather Vxlan1 interface state (JSON)
+  arista.eos.eos_command:
+    commands: "show interfaces Vxlan1 | json"
+  register: vxlan_iface
+
+- name: Assert Vxlan1 line protocol is up
+  ansible.builtin.assert:
+    that:
+      - vxlan_iface.stdout[0].interfaces.Vxlan1.lineProtocolStatus == "up"
+    fail_msg: "Vxlan1 line protocol is NOT up on {{ inventory_hostname }}"
+    success_msg: "Vxlan1 OK — line protocol up on {{ inventory_hostname }}"
+
+- name: Gather BGP EVPN summary
+  arista.eos.eos_command:
+    commands: "show bgp evpn summary"
+  register: bgp_evpn_summary
+
+- name: Assert BGP EVPN session Estab to RR peer {{ item }}
+  ansible.builtin.assert:
+    that:
+      - "'Estab' in bgp_evpn_summary.stdout[0]"
+      - "item in bgp_evpn_summary.stdout[0]"
+    fail_msg: "BGP EVPN session to {{ item }} is NOT established on {{ inventory_hostname }}"
+    success_msg: "BGP EVPN session to {{ item }} Estab on {{ inventory_hostname }}"
+  loop: "{{ evpn_rr_peers }}"
+
+- name: Gather VXLAN VNI table
+  arista.eos.eos_command:
+    commands: "show vxlan vni"
+  register: vxlan_vni_out
+
+- name: Assert L2VNI {{ item.vni }} (VLAN {{ item.vlan }}) present in VNI table
+  ansible.builtin.assert:
+    that:
+      - "item.vni | string in vxlan_vni_out.stdout[0]"
+    fail_msg: "L2VNI {{ item.vni }} (VLAN {{ item.vlan }}) missing on {{ inventory_hostname }}"
+    success_msg: "L2VNI {{ item.vni }} (VLAN {{ item.vlan }}) OK on {{ inventory_hostname }}"
+  loop: "{{ evpn_l2vnis | default([]) }}"
+
+- name: Assert L3VNI {{ item.l3vni }} (VRF {{ item.vrf }}) present in VNI table
+  ansible.builtin.assert:
+    that:
+      - "item.l3vni | string in vxlan_vni_out.stdout[0]"
+    fail_msg: "L3VNI {{ item.l3vni }} (VRF {{ item.vrf }}) missing on {{ inventory_hostname }}"
+    success_msg: "L3VNI {{ item.l3vni }} (VRF {{ item.vrf }}) OK on {{ inventory_hostname }}"
+  loop: "{{ evpn_l3vnis | default([]) }}"
+
+- name: Gather EVPN MAC-IP routes
+  arista.eos.eos_command:
+    commands: "show bgp evpn route-type mac-ip"
+  register: evpn_mac_ip
+
+- name: Assert EVPN MAC-IP routes are present (BGP learning active)
+  ansible.builtin.assert:
+    that:
+      - "'mac-ip' in evpn_mac_ip.stdout[0]"
+    fail_msg: "No EVPN MAC-IP routes found on {{ inventory_hostname }} — BGP not learning"
+    success_msg: "EVPN MAC-IP routes present on {{ inventory_hostname }}"

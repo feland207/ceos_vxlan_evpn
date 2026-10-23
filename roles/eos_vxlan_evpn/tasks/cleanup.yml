@@ -30,8 +30,16 @@
       - "no interface Vlan{{ item.svi_vlan }}"
   loop: "{{ evpn_l3vnis | default([]) }}"
 
+- name: Check virtual-router MAC address is configured
+  arista.eos.eos_command:
+    commands: "show running-config | include ip virtual-router mac-address"
+  register: vrmac_check
+  when: evpn_l3vnis | default([]) | length > 0
+
 - name: Remove virtual-router MAC address
   arista.eos.eos_config:
     lines:
-      - "no ip virtual-router mac-address"
-  when: evpn_l3vnis | default([]) | length > 0
+      - "no ip virtual-router mac-address {{ virtual_router_mac }}"
+  when:
+    - evpn_l3vnis | default([]) | length > 0
+    - vrmac_check.stdout[0] | default('') | length > 0
