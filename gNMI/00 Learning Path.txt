@@ -1,0 +1,32 @@
+Learning Path — gNMI / gRPC on Arista cEOS (3 Modules)
+
+### Module 1 — Connectivity & Capabilities
+
+Goal: Prove gNMI is reachable, parse what the device advertises.
+
+- gNMI hello exchange — what CapabilityRequest returns
+- Supported YANG models, encodings, and gNMI version
+- Understanding the capability string format (model name, organisation, version)
+
+Lab: Run the script below against all 7 nodes, compare capability sets between spine and leaf
+
+### Module 2 — Get & Subscribe
+
+Goal: Pull structured operational data and stream it.
+
+- Get RPC: retrieve interface state, BGP neighbours, LLDP
+- Path notation: origin, path elements, keys
+- JSON_IETF vs PROTO encoding — parse both in Python
+- Subscribe modes: ONCE (one-shot), POLL (on-demand), STREAM (continuous)
+
+Lab: Subscribe STREAM to interface counters on leaf1, feed output to a local JSON file, visualise with a simple print loop
+
+### Module 3 — Set & Interview Scenarios
+
+Goal: Push config changes and answer the “which would you choose” questions.
+
+- Set RPC: Update, Replace, Delete operations
+- Compare a gNMI Set vs NETCONF <edit-config> for the same change
+- Architecture scenario: 20 switches → Prometheus → Grafana (dial-in STREAM vs dial-out)
+
+Lab: Change an interface description on leaf1 via gNMI Set, verify with Get, roll it back
